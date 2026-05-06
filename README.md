@@ -44,7 +44,7 @@ It only demonstrates "how phishing works". <b>You shall not misuse the informati
   - Localhost
   - Cloudflared
   - LocalXpose
-- Mask URL support 
+- Mask URL support
 - Docker support
 
 ##
@@ -52,29 +52,35 @@ It only demonstrates "how phishing works". <b>You shall not misuse the informati
 ### Installation
 
 - Just, Clone this repository -
+
   ```
   git clone --depth=1 https://github.com/htr-tech/zphisher.git
   ```
 
 - Now go to cloned directory and run `zphisher.sh` -
+
   ```
   $ cd zphisher
   $ bash zphisher.sh
   ```
 
-- On first launch, It'll install the dependencies and that's it. ***Zphisher*** is installed.
+- On first launch, It'll install the dependencies and that's it. **_Zphisher_** is installed.
 
 ##
 
 ### Installation (Termux)
+
 You can easily install zphisher in Termux by using tur-repo
+
 ```
 $ pkg install tur-repo
 $ pkg install zphisher
 $ zphisher
 ```
-### A Note : 
-***Termux discourages hacking*** .. So never discuss anything related to *zphisher* in any of the termux discussion groups. For more check : [wiki](https://wiki.termux.com/wiki/Hacking)
+
+### A Note :
+
+**_Termux discourages hacking_** .. So never discuss anything related to _zphisher_ in any of the termux discussion groups. For more check : [wiki](https://wiki.termux.com/wiki/Hacking)
 
 ##
 
@@ -87,7 +93,7 @@ $ zphisher
 ### Installation via ".deb" file
 
 - Download `.deb` files from the [**Latest Release**](https://github.com/htr-tech/zphisher/releases/latest)
-- If you are using ***termux*** then download the `*_termux.deb`
+- If you are using **_termux_** then download the `*_termux.deb`
 
 - Install the `.deb` file by executing
   ```
@@ -104,11 +110,11 @@ $ zphisher
 ### Run on Docker
 
 - Docker Image Mirror:
-  - **DockerHub** : 
+  - **DockerHub** :
     ```
     docker pull htrtech/zphisher
     ```
-  - **GHCR** : 
+  - **GHCR** :
     ```
     docker pull ghcr.io/htr-tech/zphisher:latest
     ```
@@ -119,11 +125,13 @@ $ zphisher
   $ curl -LO https://raw.githubusercontent.com/htr-tech/zphisher/master/run-docker.sh
   $ bash run-docker.sh
   ```
+
 - Temporary Container
 
   ```
   docker run --rm -ti htrtech/zphisher
   ```
+
   - Remember to mount the `auth` directory.
 
 ##
@@ -131,12 +139,14 @@ $ zphisher
 <details>
   <summary><h3>Dependencies</h3></summary>
 
-<b>Zphisher</b> requires following programs to run properly - 
+<b>Zphisher</b> requires following programs to run properly -
+
 - `git`
 - `curl`
 - `php`
 
 > All the dependencies will be installed automatically when you run **Zphisher** for the first time.
+
 </details>
 
 <details>
@@ -160,13 +170,13 @@ $ zphisher
 ##
 
 ### Find Me on:
+
 <p align="left">
   <a href="https://tahmidrayat.is-a.dev" target="_blank"><img src="https://img.shields.io/badge/Socials-grey?style=for-the-badge&logo=linktree"></a>
   <a href="https://github.com/htr-tech" target="_blank"><img src="https://img.shields.io/badge/Github-blue?style=for-the-badge&logo=github"></a>
 </p>
 
-
-### *Thanks to all contributors*:
+### _Thanks to all contributors_:
 
 <table>
   <tr align="center">

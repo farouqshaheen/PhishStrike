@@ -66,5 +66,7 @@ for item in [".github", ".sites", "LICENSE", "README.md", "zphisher.py"]:
 try:
     subprocess.run(["dpkg-deb", "--build", "./build_env", PKG_NAME])
 except FileNotFoundError:
-    print("dpkg-deb not found. Ensure you are on a Debian-based system or have it installed.")
+    print(
+        "dpkg-deb not found. Ensure you are on a Debian-based system or have it installed."
+    )
 shutil.rmtree("build_env")

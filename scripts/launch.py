@@ -10,6 +10,7 @@ else:
     ZPHISHER_ROOT = "/opt/zphisher"
     os.environ["ZPHISHER_ROOT"] = ZPHISHER_ROOT
 
+
 def print_file(path):
     try:
         with open(path, "r") as f:
@@ -17,6 +18,7 @@ def print_file(path):
     except FileNotFoundError:
         return False
     return True
+
 
 if len(sys.argv) > 1:
     arg = sys.argv[1]
@@ -39,4 +41,6 @@ else:
         os.chdir(ZPHISHER_ROOT)
         subprocess.run(["python3", "./zphisher.py"])
     except FileNotFoundError:
-        print(f"Directory {ZPHISHER_ROOT} not found. Zphisher may not be installed correctly.")
+        print(
+            f"Directory {ZPHISHER_ROOT} not found. Zphisher may not be installed correctly."
+        )

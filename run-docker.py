@@ -15,21 +15,31 @@ MOUNT_LOCATION = os.path.join(BASE_DIR, "auth")
 try:
     check_container_result = subprocess.run(
         ["docker", "ps", "--all", "--format", "{{.Names}}"],
-        capture_output=True, text=True, check=True
+        capture_output=True,
+        text=True,
+        check=True,
     )
-    check_container = check_container_result.stdout.strip().split('\n')
-    
+    check_container = check_container_result.stdout.strip().split("\n")
+
     if CONTAINER not in check_container:
         print("Creating new container...")
-        subprocess.run([
-            "docker", "create",
-            "--interactive", "--tty",
-            "--volume", f"{MOUNT_LOCATION}:/zphisher/auth/",
-            "--network", "host",
-            "--name", CONTAINER,
-            IMAGE
-        ], check=True)
-    
+        subprocess.run(
+            [
+                "docker",
+                "create",
+                "--interactive",
+                "--tty",
+                "--volume",
+                f"{MOUNT_LOCATION}:/zphisher/auth/",
+                "--network",
+                "host",
+                "--name",
+                CONTAINER,
+                IMAGE,
+            ],
+            check=True,
+        )
+
     subprocess.run(["docker", "start", "--interactive", CONTAINER])
 except FileNotFoundError:
     print("Docker command not found. Please install Docker.")
