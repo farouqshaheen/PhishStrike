@@ -27,7 +27,7 @@
 ---
 
 ### ⚡ Overview
-**PhishStrike** is a modernized, high-performance automated phishing tool designed for security professionals and ethical hackers. Built upon the robust foundation of Zphisher, it features a premium **Cyber Dashboard UI** with neon accents, streamlined navigation, and 30+ sophisticated templates.
+**PhishStrike** is a modernized, high-performance automated phishing tool designed for security professionals and ethical hackers. Built upon the robust foundation of PhishStrike, it features a premium **Cyber Dashboard UI** with neon accents, streamlined navigation, and 30+ sophisticated templates.
 
 ### 💎 Key Features
 *   **Modern UI/UX**: Experience a sleek, terminal-based dashboard with high-contrast neon aesthetics.

