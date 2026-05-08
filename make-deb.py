@@ -5,7 +5,7 @@ import shutil
 import subprocess
 import platform
 
-PACKAGE = "zphisher"
+PACKAGE = "phishstrike"
 VERSION = "2.3.5"
 ARCH = "all"
 PKG_NAME = f"{PACKAGE}_{VERSION}_{ARCH}.deb"
@@ -36,7 +36,7 @@ Version: {VERSION}
 Architecture: {ARCH}
 Maintainer: @htr-tech
 Depends: {depend}
-Homepage: https://github.com/htr-tech/zphisher
+Homepage: https://github.com/farouqshaheen/PhishStrike
 Description: An automated phishing tool with 30+ templates. This Tool is made for educational purpose only !
 """)
 
@@ -56,7 +56,7 @@ shutil.copy2("scripts/launch.py", f"build_env/{bin_dir}/{PACKAGE}")
 if platform.system() != "Windows":
     os.chmod(f"build_env/{bin_dir}/{PACKAGE}", 0o755)
 
-for item in [".github", ".sites", "LICENSE", "README.md", "zphisher.py"]:
+for item in [".github", ".sites", "LICENSE", "README.md", "phishstrike.py"]:
     if os.path.exists(item):
         if os.path.isdir(item):
             shutil.copytree(item, f"build_env/{opt_dir}/{item}")

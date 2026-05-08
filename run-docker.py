@@ -7,9 +7,9 @@ if not os.path.isdir(os.path.join(BASE_DIR, "auth")):
     print("Creating Auth Directory..")
     os.makedirs(os.path.join(BASE_DIR, "auth"))
 
-CONTAINER = "zphisher"
-IMAGE = "htrtech/zphisher:latest"
-IMG_MIRROR = "ghcr.io/htr-tech/zphisher:latest"
+CONTAINER = "phishstrike"
+IMAGE = "farouqshaheen/phishstrike:latest"
+IMG_MIRROR = "ghcr.io/farouqshaheen/phishstrike:latest"
 MOUNT_LOCATION = os.path.join(BASE_DIR, "auth")
 
 try:
@@ -30,7 +30,7 @@ try:
                 "--interactive",
                 "--tty",
                 "--volume",
-                f"{MOUNT_LOCATION}:/zphisher/auth/",
+                f"{MOUNT_LOCATION}:/phishstrike/auth/",
                 "--network",
                 "host",
                 "--name",

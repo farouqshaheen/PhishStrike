@@ -49,7 +49,7 @@ git clone https://github.com/farouqshaheen/PhishStrike.git
 cd PhishStrike
 
 # Launch the Dashboard
-python3 zphisher.py
+python3 phishstrike.py
 ```
 
 #### Docker Deployment

