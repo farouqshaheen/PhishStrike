@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/farouqshaheen/PhishStrike/main/.github/misc/logo.png" width="200">
+  <img src="https://raw.githubusercontent.com/farouqshaheen/PhishStrike/.github/misc/logo.png" width="200">
 </p>
 
 <h1 align="center">PHISH STRIKE</h1>
