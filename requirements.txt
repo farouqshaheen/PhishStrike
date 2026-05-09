@@ -1,2 +1,7 @@
-requests
 qrcode[pil]
+flask
+flask-socketio
+google-generativeai
+pandas
+openpyxl
+requests

