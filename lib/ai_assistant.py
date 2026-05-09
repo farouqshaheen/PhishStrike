@@ -40,9 +40,10 @@ def save_api_key(api_key):
         genai.configure(api_key=api_key)
 
 
-def _get_available_model(api_key):
-    """Query ListModels to find a model that supports generateContent."""
+def _get_available_models(api_key):
+    """Return a list of models to try, prioritizing those that are likely available."""
     import json as _json
+    models_to_try = []
     url = f"https://generativelanguage.googleapis.com/v1beta/models?key={api_key}"
     req = urllib.request.Request(url, headers={"Content-Type": "application/json"})
     try:
@@ -51,43 +52,77 @@ def _get_available_model(api_key):
             for m in data.get("models", []):
                 methods = m.get("supportedGenerationMethods", [])
                 name = m.get("name", "")
-                if "generateContent" in methods and "flash" in name:
-                    return name.replace("models/", "")
-            # Fallback: return first model that supports generateContent
-            for m in data.get("models", []):
-                if "generateContent" in m.get("supportedGenerationMethods", []):
-                    return m.get("name", "").replace("models/", "")
+                if "generateContent" in methods:
+                    name = name.replace("models/", "")
+                    if "flash" in name:
+                        models_to_try.append(name)
     except Exception:
         pass
-    return "gemini-2.0-flash"  # last resort
+    
+    # Add robust fallbacks in case ListModels fails (e.g. 403 Forbidden)
+    fallbacks = [
+        "gemini-1.5-flash-latest",
+        "gemini-1.5-flash",
+        "gemini-1.5-pro",
+        "gemini-pro",
+        "gemini-2.0-flash"
+    ]
+    for fb in fallbacks:
+        if fb not in models_to_try:
+            models_to_try.append(fb)
+            
+    return models_to_try
 
 
 def _call_api_http(api_key, prompt):
     """Direct HTTP call to Gemini API."""
     import json as _json
 
-    model_name = _get_available_model(api_key)
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key}"
-    payload = _json.dumps({
-        "contents": [{"parts": [{"text": prompt}]}]
-    }).encode("utf-8")
+    models = _get_available_models(api_key)
+    last_error = ""
 
-    req = urllib.request.Request(
-        url,
-        data=payload,
-        headers={"Content-Type": "application/json"},
-        method="POST"
-    )
+    for model_name in models:
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key}"
+        payload = _json.dumps({
+            "contents": [{"parts": [{"text": prompt}]}]
+        }).encode("utf-8")
 
-    try:
-        with urllib.request.urlopen(req, timeout=30) as resp:
-            data = _json.loads(resp.read().decode("utf-8"))
-            return data["candidates"][0]["content"]["parts"][0]["text"]
-    except urllib.error.HTTPError as e:
-        body = e.read().decode("utf-8")
-        return f"API Error ({e.code}): {body}"
-    except Exception as e:
-        return f"Error: {str(e)}"
+        req = urllib.request.Request(
+            url,
+            data=payload,
+            headers={"Content-Type": "application/json"},
+            method="POST"
+        )
+
+        try:
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                data = _json.loads(resp.read().decode("utf-8"))
+                return data["candidates"][0]["content"]["parts"][0]["text"]
+        except urllib.error.HTTPError as e:
+            try:
+                body = e.read().decode("utf-8")
+                error_data = _json.loads(body)
+                error_msg = error_data.get("error", {}).get("message", body)
+                
+                # If 404, the model doesn't exist. Try the next one.
+                if e.code == 404:
+                    last_error = f"Model {model_name} not found."
+                    continue
+                    
+                # If 429 limit 0, try next model. If it's a temporary 429, maybe break?
+                # Usually we want to try the next model if limit is 0, but we can't easily parse limit: 0 reliably.
+                # Let's just try the next model on any 429.
+                if e.code == 429:
+                    last_error = f"\n\033[1;31m[!] Quota Exceeded (429)\033[0m on {model_name}.\nFull Error: {error_msg}"
+                    continue
+
+                return f"API Error ({e.code}) on {model_name}: {error_msg}"
+            except Exception:
+                return f"API Error ({e.code}) on {model_name}: {str(e)}"
+        except Exception as e:
+            return f"Error on {model_name}: {str(e)}"
+
+    return f"Failed to generate template after trying multiple models.\nLast Error: {last_error}"
 
 
 def generate_templates(platform, scenario):

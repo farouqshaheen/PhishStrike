@@ -929,17 +929,9 @@ def ai_assistant_menu():
     )
     result = ai_assistant.generate_templates(platform_name, scenario)
 
-    # Save to txt file as backup
-    if not os.path.exists("ai_output"):
-        os.makedirs("ai_output")
-    filename = f"ai_output/phishing_{platform_name}_{int(time.time())}.txt"
-    with open(filename, "w", encoding="utf-8") as f:
-        f.write(f"Platform: {platform_name}\nScenario: {scenario}\n\n{result}")
-
     print(f"\n{WHITE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━{RESET}")
     print(result)
     print(f"{WHITE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━{RESET}")
-    print(f"\n{DARK}[{WHITE}-{DARK}]{MEDIUM} Also saved to : {WHITE}{filename}")
 
     input(f"\n    {DARK}[{WHITE}Enter{DARK}]{LIGHT2} to return to main menu...")
     main_menu()
