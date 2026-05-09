@@ -13,7 +13,6 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Version-2.3.5-00FFFF?style=for-the-badge&logo=probot&logoColor=black">
   <img src="https://img.shields.io/github/license/farouqshaheen/PhishStrike?style=for-the-badge&color=blueviolet">
   <img src="https://img.shields.io/github/stars/farouqshaheen/PhishStrike?style=for-the-badge&color=FF2DAA">
   <img src="https://img.shields.io/github/forks/farouqshaheen/PhishStrike?style=for-the-badge&color=0066CC">

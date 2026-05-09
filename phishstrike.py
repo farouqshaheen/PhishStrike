@@ -18,8 +18,6 @@ if sys.stdout.encoding != "utf-8":
     except AttributeError:
         pass
 
-__version__ = "2.3.5"
-
 HOST = "127.0.0.1"
 PORT = "8080"
 
@@ -83,38 +81,11 @@ def kill_pid():
             os.system(f"killall {p} > /dev/null 2>&1")
 
 
-def check_update():
-    print(f"\n{PURPLE}[{LIGHT1}+{PURPLE}]{LIGHT2} Checking for update : ", end="")
-    try:
-        req = urllib.request.Request(
-            "https://api.github.com/repos/farouqshaheen/PhishStrike/releases/latest",
-            headers={"User-Agent": "Mozilla/5.0"},
-        )
-        with urllib.request.urlopen(req) as response:
-            data = json.loads(response.read().decode("utf-8"))
-            new_version = data.get("tag_name", "").strip()
-            if new_version and new_version != __version__:
-                print(f"{LIGHT2}update found\n{LIGHT1}")
-                time.sleep(2)
-                print(f"\n{PURPLE}[{LIGHT1}+{PURPLE}]{LIGHT2} Downloading Update...")
-                tarball_url = f"https://github.com/farouqshaheen/PhishStrike/archive/refs/tags/{new_version}.tar.gz"
-                # For simplicity, we just prompt the user
-                print(
-                    f"\n{PURPLE}[{LIGHT1}+{PURPLE}]{LIGHT2} Please manually pull the latest version or download from {tarball_url}"
-                )
-            else:
-                print(f"{PURPLE}up to date\n{LIGHT1}")
-                time.sleep(0.5)
-    except Exception:
-        print(f"{DARK}Offline{LIGHT1}")
-
-
 def check_status():
     print(f"\n{PURPLE}[{LIGHT1}+{PURPLE}]{LIGHT2} Internet Status : ", end="")
     try:
         urllib.request.urlopen("https://api.github.com", timeout=3)
         print(f"{PURPLE}Online{LIGHT1}")
-        check_update()
     except Exception:
         print(f"{DARK}Offline{LIGHT1}")
 
