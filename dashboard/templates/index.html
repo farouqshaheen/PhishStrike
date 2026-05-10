@@ -3,366 +3,463 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PhishStrike Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<title>PhishStrike | High-Tech Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{
-  --bg:#07090f;--panel:#0d1117;--panel2:#131920;
-  --accent:#00e5ff;--accent2:#7c3aed;--green:#00ff88;--red:#ff3f5f;--orange:#ff9500;
-  --text:#e2e8f0;--dim:#64748b;--border:#1e2d3d;
+:root {
+  --bg: #030508;
+  --panel: rgba(10, 14, 20, 0.85);
+  --panel-solid: #0a0e14;
+  --accent: #00f2ff;
+  --accent-glow: rgba(0, 242, 255, 0.4);
+  --accent2: #7c3aed;
+  --accent2-glow: rgba(124, 58, 237, 0.4);
+  --green: #10b981;
+  --red: #ef4444;
+  --orange: #f59e0b;
+  --text: #f1f5f9;
+  --dim: #64748b;
+  --border: rgba(255, 255, 255, 0.05);
 }
-body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;overflow-x:hidden}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Outfit', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Cyber Canvas Background */
+#cyber-canvas {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.3;
+}
 
 /* Scrollbar */
-::-webkit-scrollbar{width:6px}
-::-webkit-scrollbar-track{background:var(--panel)}
-::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--accent2); border-radius: 10px; }
 
-/* Layout */
-.layout{display:grid;grid-template-columns:220px 1fr;min-height:100vh}
+.layout { display: grid; grid-template-columns: 280px 1fr; min-height: 100vh; }
 
 /* Sidebar */
-.sidebar{background:var(--panel);border-right:1px solid var(--border);padding:1.5rem 1rem;display:flex;flex-direction:column;gap:1.5rem;position:sticky;top:0;height:100vh}
-.logo{font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:700;color:var(--accent);letter-spacing:3px;text-transform:uppercase;padding-bottom:1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
-.logo-dot{width:8px;height:8px;background:var(--accent);border-radius:50%;animation:blink 1.5s infinite}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
-nav{display:flex;flex-direction:column;gap:4px}
-.nav-item{padding:.65rem 1rem;border-radius:8px;color:var(--dim);font-size:.875rem;font-weight:500;cursor:pointer;transition:.2s;display:flex;align-items:center;gap:10px;text-decoration:none}
-.nav-item:hover,.nav-item.active{background:rgba(0,229,255,.08);color:var(--accent)}
-.nav-item svg{width:16px;height:16px;flex-shrink:0}
-.sidebar-footer{margin-top:auto;font-size:.75rem;color:var(--dim);line-height:1.6}
+.sidebar {
+  background: rgba(5, 7, 10, 0.95);
+  backdrop-filter: blur(20px);
+  border-right: 1px solid var(--border);
+  padding: 2.5rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+  position: sticky;
+  top: 0; height: 100vh;
+  animation: slideInLeft 1s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 10;
+}
+@keyframes slideInLeft {
+  from { transform: translateX(-100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.logo {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 2px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+.logo span { color: var(--accent); position: relative; }
+.logo span::after {
+  content: ''; position: absolute; bottom: -4px; left: 0;
+  width: 100%; height: 2px; background: var(--accent);
+  box-shadow: 0 0 10px var(--accent);
+}
+.logo-icon {
+  width: 40px; height: 40px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 20px var(--accent-glow);
+  animation: rotateGlow 4s linear infinite;
+}
+@keyframes rotateGlow {
+  0% { filter: hue-rotate(0deg); }
+  100% { filter: hue-rotate(360deg); }
+}
+
+nav { display: flex; flex-direction: column; gap: 10px; }
+.nav-item {
+  padding: 1rem 1.25rem;
+  border-radius: 16px;
+  color: var(--dim);
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.4s;
+  display: flex; align-items: center; gap: 14px;
+  text-decoration: none;
+  border: 1px solid transparent;
+}
+.nav-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  transform: translateX(5px);
+}
+.nav-item.active {
+  background: rgba(0, 242, 255, 0.08);
+  color: var(--accent);
+  border-color: rgba(0, 242, 255, 0.15);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+}
 
 /* Main */
-main{padding:2rem;overflow-y:auto}
-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem}
-header h1{font-size:1.5rem;font-weight:700;letter-spacing:-0.5px}
-header h1 span{color:var(--accent)}
-.header-right{display:flex;align-items:center;gap:12px}
-.live-badge{display:flex;align-items:center;gap:6px;background:rgba(0,255,136,.08);border:1px solid rgba(0,255,136,.2);padding:4px 12px;border-radius:20px;font-size:.75rem;font-weight:600;color:var(--green)}
-.live-dot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:blink 1.2s infinite}
+main { padding: 3rem; overflow-y: auto; position: relative; }
+
+header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 4rem;
+  animation: fadeInDown 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes fadeInDown {
+  from { transform: translateY(-30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+header h1 { font-size: 2.5rem; font-weight: 800; }
+header h1 span {
+  background: linear-gradient(to right, var(--accent), var(--accent2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.live-badge {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  padding: 8px 20px; border-radius: 40px;
+  font-size: 0.85rem; font-weight: 700; color: var(--green);
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.1);
+}
+.live-dot {
+  width: 10px; height: 10px; background: var(--green);
+  border-radius: 50%; animation: pulse 1.5s infinite;
+  box-shadow: 0 0 10px var(--green);
+}
+@keyframes pulse {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+  70% { transform: scale(1.3); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
 
 /* Stats */
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:2rem}
-.stat{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:1.25rem;position:relative;overflow:hidden;transition:.3s}
-.stat:hover{border-color:var(--accent);transform:translateY(-2px)}
-.stat::after{content:'';position:absolute;top:0;left:0;width:100%;height:2px;background:var(--accent-color,var(--accent))}
-.stat.red::after{background:var(--red)} .stat.green::after{background:var(--green)} .stat.orange::after{background:var(--orange)} .stat.purple::after{background:var(--accent2)}
-.stat-label{font-size:.75rem;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.5rem}
-.stat-val{font-family:'JetBrains Mono',monospace;font-size:2rem;font-weight:700;line-height:1}
-.stat-sub{font-size:.7rem;color:var(--dim);margin-top:.25rem}
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 4rem;
+}
+.stat {
+  background: var(--panel);
+  backdrop-filter: blur(15px);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+  transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: fadeInUp 0.8s backwards;
+}
+@keyframes fadeInUp {
+  from { transform: translateY(40px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.stat:nth-child(1) { animation-delay: 0.1s; }
+.stat:nth-child(2) { animation-delay: 0.2s; }
+.stat:nth-child(3) { animation-delay: 0.3s; }
+.stat:nth-child(4) { animation-delay: 0.4s; }
 
-/* Toolbar */
-.toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem}
-.toolbar-left{display:flex;align-items:center;gap:.5rem}
-.toolbar h2{font-size:1rem;font-weight:600}
-.count-badge{background:var(--accent);color:#000;font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:10px}
+.stat:hover {
+  transform: translateY(-12px);
+  border-color: var(--accent);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+}
+.stat::before {
+  content: ''; position: absolute; top: 0; left: -100%;
+  width: 100%; height: 2px; background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  animation: scan 4s linear infinite;
+}
+@keyframes scan { to { left: 200%; } }
+
+.stat-label { font-size: 0.9rem; color: var(--dim); text-transform: uppercase; letter-spacing: 1.5px; }
+.stat-val { font-family: 'JetBrains Mono', monospace; font-size: 2.75rem; font-weight: 800; color: #fff; margin: 0.5rem 0; }
+
+/* Table Section */
+.table-wrap {
+  background: var(--panel);
+  backdrop-filter: blur(15px);
+  border: 1px solid var(--border);
+  border-radius: 30px;
+  overflow: hidden;
+  animation: fadeInUp 1s backwards 0.6s;
+  box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+}
+table { width: 100%; border-collapse: collapse; }
+th {
+  text-align: left; padding: 1.5rem;
+  font-size: 0.8rem; font-weight: 700; text-transform: uppercase;
+  color: var(--dim); letter-spacing: 1.5px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(255,255,255,0.02);
+}
+td { padding: 1.5rem; font-size: 0.95rem; border-bottom: 1px solid rgba(255,255,255,0.02); }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(0, 242, 255, 0.03); }
+
+.platform-badge {
+  padding: 6px 16px; border-radius: 10px;
+  font-size: 0.75rem; font-weight: 700;
+  background: rgba(0, 242, 255, 0.1);
+  color: var(--accent);
+  border: 1px solid rgba(0, 242, 255, 0.2);
+  text-transform: uppercase;
+}
+.pw-text { filter: blur(8px); transition: 0.4s; color: var(--accent2); font-family: 'JetBrains Mono'; }
+tr:hover .pw-text { filter: blur(0); }
 
 /* Buttons */
-.btn{display:inline-flex;align-items:center;gap:6px;padding:.5rem 1rem;border-radius:8px;border:none;font-size:.8rem;font-weight:600;cursor:pointer;transition:.2s;font-family:'Inter',sans-serif}
-.btn svg{width:14px;height:14px}
-.btn:active{transform:scale(.97)}
-.btn-primary{background:var(--accent);color:#000}
-.btn-primary:hover{background:#00c4dd}
-.btn-secondary{background:var(--panel2);color:var(--text);border:1px solid var(--border)}
-.btn-secondary:hover{border-color:var(--accent);color:var(--accent)}
-.btn-danger{background:rgba(255,63,95,.1);color:var(--red);border:1px solid rgba(255,63,95,.2)}
-.btn-danger:hover{background:var(--red);color:#fff}
-.btn-green{background:rgba(0,255,136,.1);color:var(--green);border:1px solid rgba(0,255,136,.2)}
-.btn-green:hover{background:var(--green);color:#000}
-
-/* Table */
-.table-wrap{background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:hidden}
-.table-wrap table{width:100%;border-collapse:collapse}
-th{background:#0a0f18;color:var(--dim);font-size:.7rem;text-transform:uppercase;letter-spacing:.5px;padding:.9rem 1rem;text-align:left;font-weight:600;border-bottom:1px solid var(--border)}
-td{padding:.85rem 1rem;border-bottom:1px solid rgba(30,45,61,.5);font-size:.85rem;vertical-align:middle}
-tr:last-child td{border-bottom:none}
-tr:hover td{background:rgba(0,229,255,.02)}
-.mono{font-family:'JetBrains Mono',monospace;font-size:.78rem}
-.platform-badge{display:inline-block;padding:2px 10px;border-radius:4px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;background:rgba(0,229,255,.08);color:var(--accent);border:1px solid rgba(0,229,255,.15)}
-.pw-cell{color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:.78rem;cursor:pointer;position:relative}
-.pw-cell .pw-text{filter:blur(4px);transition:.2s}
-.pw-cell:hover .pw-text{filter:none}
-.ip-badge{font-size:.75rem;color:var(--dim);font-family:'JetBrains Mono',monospace}
-
-/* Empty state */
-.empty{text-align:center;padding:4rem 2rem;color:var(--dim)}
-.empty-icon{font-size:3rem;margin-bottom:1rem;opacity:.3}
-.empty p{font-size:.9rem}
+.btn {
+  padding: 1rem 2rem; border-radius: 16px;
+  font-size: 0.9rem; font-weight: 700; cursor: pointer;
+  transition: 0.4s; display: inline-flex; align-items: center; gap: 12px;
+  border: none; font-family: inherit;
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #000; box-shadow: 0 10px 25px var(--accent-glow);
+}
+.btn-primary:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 15px 35px var(--accent-glow);
+}
 
 /* Toast */
-#toast-container{position:fixed;bottom:2rem;right:2rem;display:flex;flex-direction:column;gap:.5rem;z-index:9999}
-.toast{background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:.75rem 1.25rem;font-size:.85rem;display:flex;align-items:center;gap:10px;animation:slideIn .3s ease;min-width:250px;max-width:350px}
-.toast.success{border-color:rgba(0,255,136,.3);color:var(--green)}
-.toast.error{border-color:rgba(255,63,95,.3);color:var(--red)}
-.toast.info{border-color:rgba(0,229,255,.3);color:var(--accent)}
-@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
-
-/* Confirm Modal */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
-.modal-overlay.active{display:flex}
-.modal{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:2rem;max-width:380px;width:90%;text-align:center}
-.modal h3{font-size:1.1rem;margin-bottom:.75rem}
-.modal p{color:var(--dim);font-size:.875rem;margin-bottom:1.5rem}
-.modal-actions{display:flex;gap:.75rem;justify-content:center}
-
-/* New victim highlight */
-@keyframes highlight{0%{background:rgba(0,255,136,.08)}100%{background:transparent}}
-.new-row{animation:highlight 2s ease}
+.toast {
+  background: rgba(10, 14, 20, 0.95);
+  backdrop-filter: blur(15px);
+  border: 1px solid var(--accent);
+  padding: 1.25rem 2rem; border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+  animation: slideInRight 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex; align-items: center; gap: 15px;
+  font-weight: 600;
+}
+@keyframes slideInRight {
+  from { transform: translateX(100%) scale(0.8); opacity: 0; }
+  to { transform: translateX(0) scale(1); opacity: 1; }
+}
 </style>
 </head>
 <body>
 
+<canvas id="cyber-canvas"></canvas>
+
 <div class="layout">
-  <!-- Sidebar -->
   <aside class="sidebar">
     <div class="logo">
-      <div class="logo-dot"></div>
-      PhishStrike
+      <div class="logo-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      </div>
+      PHISH<span>STRIKE</span>
     </div>
     <nav>
-      <a class="nav-item active" href="/">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-        Dashboard
+      <a class="nav-item active" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        DASHBOARD
       </a>
-      <a class="nav-item" href="/api/export_csv" id="nav-csv">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-        Export CSV
+      <a class="nav-item" href="/api/export_csv">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        CSV EXPORT
       </a>
-      <a class="nav-item" href="/api/export" id="nav-excel">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-        Export Excel
+      <a class="nav-item" href="/api/export_pdf">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><circle cx="12" cy="13" r="4"/></svg>
+        PDF INTEL
       </a>
     </nav>
-    <div class="sidebar-footer">
-      PhishStrike v2.0<br>
-      For Ethical Use Only
+    <div style="margin-top:auto; padding: 1.5rem; background: rgba(0,242,255,0.05); border-radius: 20px; border: 1px solid rgba(0,242,255,0.1)">
+      <p style="font-size: 0.8rem; color: var(--dim); letter-spacing: 1px">CORE STATUS</p>
+      <p style="font-size: 1rem; color: var(--green); font-weight: 800; margin-top: 5px">ACTIVE</p>
     </div>
   </aside>
 
-  <!-- Main Content -->
   <main>
     <header>
-      <h1>Management <span>Dashboard</span></h1>
+      <h1>Intelligent <span>Phishing Analytics</span></h1>
       <div class="header-right">
-        <div class="live-badge"><div class="live-dot"></div>Live Feed</div>
+        <div class="live-badge"><div class="live-dot"></div> LIVE TRAFFIC</div>
         <button class="btn btn-primary" onclick="loadData()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-          Refresh
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="18"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          REFRESH
         </button>
       </div>
     </header>
 
-    <!-- Stats -->
     <div class="stats">
       <div class="stat">
-        <div class="stat-label">Total Captured</div>
+        <div class="stat-label">Total Victims</div>
         <div class="stat-val" id="stat-total">0</div>
-        <div class="stat-sub">All time</div>
+        <div class="stat-sub">Across all vectors</div>
       </div>
-      <div class="stat green">
+      <div class="stat">
         <div class="stat-label">Credentials</div>
-        <div class="stat-val" id="stat-creds">0</div>
-        <div class="stat-sub">Username + Password</div>
+        <div class="stat-val" id="stat-creds" style="color: var(--green)">0</div>
+        <div class="stat-sub">Validated Access</div>
       </div>
-      <div class="stat orange">
-        <div class="stat-label">IP Only</div>
-        <div class="stat-val" id="stat-ips">0</div>
-        <div class="stat-sub">No credentials</div>
+      <div class="stat">
+        <div class="stat-label">Discovery (IP)</div>
+        <div class="stat-val" id="stat-ips" style="color: var(--orange)">0</div>
+        <div class="stat-sub">Geographic Data</div>
       </div>
-      <div class="stat purple">
-        <div class="stat-label">Platforms</div>
-        <div class="stat-val" id="stat-platforms">0</div>
-        <div class="stat-sub">Unique</div>
-      </div>
-    </div>
-
-    <!-- Table Toolbar -->
-    <div class="toolbar">
-      <div class="toolbar-left">
-        <h2>Captured Victims</h2>
-        <span class="count-badge" id="count-badge">0</span>
-      </div>
-      <div style="display:flex;gap:.5rem;flex-wrap:wrap">
-        <button class="btn btn-green" onclick="window.location='/api/export_csv'">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          CSV
-        </button>
-        <button class="btn btn-secondary" onclick="window.location='/api/export'" id="btn-excel">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-          Excel
-        </button>
-        <button class="btn btn-danger" onclick="confirmDeleteAll()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-          Clear All
-        </button>
+      <div class="stat">
+        <div class="stat-label">Attack Vectors</div>
+        <div class="stat-val" id="stat-platforms" style="color: var(--accent2)">0</div>
+        <div class="stat-sub">Active Modules</div>
       </div>
     </div>
 
-    <!-- Table -->
     <div class="table-wrap">
       <table>
         <thead>
           <tr>
             <th>#</th>
-            <th>Platform</th>
-            <th>Username</th>
-            <th>Password</th>
-            <th>IP Address</th>
-            <th>Captured At</th>
-            <th>Action</th>
+            <th>Module</th>
+            <th>Identity</th>
+            <th>Secret</th>
+            <th>Network (IP)</th>
+            <th>Time</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody id="victims-body">
-          <tr><td colspan="7"><div class="empty"><div class="empty-icon">🎯</div><p>No victims captured yet. Start a campaign.</p></div></td></tr>
+          <tr><td colspan="7" style="text-align:center; padding: 5rem; color: var(--dim)">Awaiting incoming data stream...</td></tr>
         </tbody>
       </table>
     </div>
   </main>
 </div>
 
-<!-- Confirm Modal -->
-<div class="modal-overlay" id="confirm-modal">
-  <div class="modal">
-    <h3 id="modal-title">Confirm Action</h3>
-    <p id="modal-msg">Are you sure?</p>
-    <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-      <button class="btn btn-danger" id="modal-confirm-btn">Delete</button>
-    </div>
-  </div>
-</div>
-
-<!-- Toast Container -->
-<div id="toast-container"></div>
-
-<audio id="notif-sound" preload="auto">
-  <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2ozBi5arNPfpGMxBDFhqdPlqG00CC5asNPzqm03CzVgqcviqW00CC5arNLlqGoyBS1eq9PmpGMyBzBYo8TYomMsBi9Xo8bepGw2CDBlqsfao2ouBi1ep9fMrmc1CTZhqNDoqmw4Cztjq9LtqWs2CC5dqtPlp2g0CC1mq9PnpGg2DS9qqNPmpGo5DS9sqtPnpW04DjJtqdPmpG83DjVwqtPnpWo4DjZzqtPnpG44DjZ1qtPmpG44DjZ3qtPnpG01DjV4qtPmpG03DjZ5qtPmpGw5DjZ7qNPnpmw3DjV7qNPnpWs1DTV7qNPmpWc0DS97p9PmpWU0DjN7qNPmpGU2DjN8p9PnpGQ2Di57p9PmpGM2Di58p9PmpWA1Di59p9PmpWI2Di1+p9PnpGI5Di1/p9PnpGU5DC1/p9PmpWU6DC2Ap9PmpWk7DS6Cp9PmpW06DS6Ep9PmpW06DS6Gp9PmpW8" type="audio/wav">
-</audio>
+<div id="toast-container" style="position:fixed; top:2rem; right:2rem; z-index:9999;"></div>
 
 <script>
+// --- Cyber Canvas Animation ---
+const canvas = document.getElementById('cyber-canvas');
+const ctx = canvas.getContext('2d');
+let w, h, columns;
+const size = 20;
+const drops = [];
+
+function initCanvas() {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+    columns = Math.floor(w / size);
+    for (let i = 0; i < columns; i++) drops[i] = 1;
+}
+
+function draw() {
+    ctx.fillStyle = 'rgba(3, 5, 8, 0.1)';
+    ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = '#00f2ff';
+    ctx.font = size + 'px monospace';
+    for (let i = 0; i < drops.length; i++) {
+        const text = String.fromCharCode(Math.random() * 128);
+        ctx.fillText(text, i * size, drops[i] * size);
+        if (drops[i] * size > h && Math.random() > 0.975) drops[i] = 0;
+        drops[i]++;
+    }
+}
+window.addEventListener('resize', initCanvas);
+initCanvas();
+setInterval(draw, 33);
+
+// --- Dashboard Logic ---
 const socket = io();
-let allVictims = [];
 
 function toast(msg, type='info') {
-  const c = document.getElementById('toast-container');
+  const container = document.getElementById('toast-container');
   const t = document.createElement('div');
   t.className = `toast ${type}`;
-  const icons = {success:'✅', error:'❌', info:'ℹ️'};
-  t.innerHTML = `<span>${icons[type]||'ℹ️'}</span>${msg}`;
-  c.appendChild(t);
-  setTimeout(() => { t.style.opacity='0'; t.style.transform='translateX(100%)'; t.style.transition='.3s'; setTimeout(()=>t.remove(), 300); }, 3000);
+  t.innerHTML = `<span>⚡</span> ${msg}`;
+  container.appendChild(t);
+  setTimeout(() => {
+    t.style.opacity = '0';
+    t.style.transform = 'translateX(50px) scale(0.9)';
+    setTimeout(() => t.remove(), 600);
+  }, 4000);
 }
 
 function loadData() {
-  fetch('/api/victims')
-    .then(r => r.json())
-    .then(data => {
-      allVictims = data;
-      renderTable(data);
-      updateStats(data);
-    })
-    .catch(() => toast('Failed to load data', 'error'));
+  fetch('/api/victims').then(r => r.json()).then(data => {
+    renderTable(data);
+    updateStats(data);
+  });
 }
 
 function updateStats(data) {
   const creds = data.filter(v => v.username !== 'IP_ONLY').length;
-  const ips   = data.filter(v => v.username === 'IP_ONLY').length;
+  const ips = data.filter(v => v.username === 'IP_ONLY').length;
   const platforms = new Set(data.map(v => v.platform)).size;
-  document.getElementById('stat-total').textContent = data.length;
-  document.getElementById('stat-creds').textContent = creds;
-  document.getElementById('stat-ips').textContent = ips;
-  document.getElementById('stat-platforms').textContent = platforms;
-  document.getElementById('count-badge').textContent = data.length;
+  document.getElementById('stat-total').innerText = data.length;
+  document.getElementById('stat-creds').innerText = creds;
+  document.getElementById('stat-ips').innerText = ips;
+  document.getElementById('stat-platforms').innerText = platforms;
 }
 
 function renderTable(data) {
   const tbody = document.getElementById('victims-body');
   if (!data.length) {
-    tbody.innerHTML = '<tr><td colspan="7"><div class="empty"><div class="empty-icon">🎯</div><p>No victims captured yet. Start a campaign.</p></div></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 5rem; color: var(--dim)">Awaiting incoming data stream...</td></tr>';
     return;
   }
   tbody.innerHTML = data.map((v, i) => `
-    <tr id="row-${v.id}">
-      <td class="mono" style="color:var(--dim)">${i+1}</td>
+    <tr style="animation: fadeInUp 0.6s ease backwards; animation-delay: ${i * 0.08}s">
+      <td style="color:var(--dim)">${v.id}</td>
       <td><span class="platform-badge">${v.platform}</span></td>
-      <td class="mono">${v.username === 'IP_ONLY' ? '<span style="color:var(--dim)">IP Only</span>' : v.username}</td>
-      <td class="pw-cell"><span class="pw-text">${v.password === 'N/A' ? '—' : v.password}</span></td>
-      <td class="ip-badge">${v.ip}</td>
-      <td style="color:var(--dim);font-size:.78rem">${v.timestamp}</td>
+      <td style="font-weight: 600">${v.username === 'IP_ONLY' ? '<span style="color:var(--dim)">DISCOVERY</span>' : v.username}</td>
+      <td><span class="pw-text">${v.password === 'N/A' ? '—' : v.password}</span></td>
+      <td style="font-family: 'JetBrains Mono'; font-size: 0.85rem">${v.ip}</td>
+      <td style="color:var(--dim); font-size: 0.8rem">${v.timestamp}</td>
       <td>
-        <button class="btn btn-danger" style="padding:4px 10px;font-size:.75rem" onclick="deleteOne(${v.id})">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
-          Del
-        </button>
+        <button class="btn" style="padding: 6px 12px; background: rgba(239,68,68,0.1); color: var(--red); border: 1px solid rgba(239,68,68,0.2)" onclick="deleteOne(${v.id})">PURGE</button>
       </td>
     </tr>
   `).join('');
 }
 
-let pendingDeleteId = null;
-let pendingDeleteAll = false;
-
 function deleteOne(id) {
-  pendingDeleteId = id;
-  pendingDeleteAll = false;
-  document.getElementById('modal-title').textContent = 'Delete Victim';
-  document.getElementById('modal-msg').textContent = 'Are you sure you want to delete this record? This cannot be undone.';
-  document.getElementById('confirm-modal').classList.add('active');
-  document.getElementById('modal-confirm-btn').onclick = doDelete;
-}
-
-function confirmDeleteAll() {
-  pendingDeleteAll = true;
-  pendingDeleteId = null;
-  document.getElementById('modal-title').textContent = 'Clear All Records';
-  document.getElementById('modal-msg').textContent = 'This will permanently delete ALL captured victims. Are you absolutely sure?';
-  document.getElementById('confirm-modal').classList.add('active');
-  document.getElementById('modal-confirm-btn').onclick = doDelete;
-}
-
-function closeModal() {
-  document.getElementById('confirm-modal').classList.remove('active');
-}
-
-function doDelete() {
-  closeModal();
-  const url = pendingDeleteAll ? '/api/delete_all' : `/api/delete/${pendingDeleteId}`;
-  fetch(url, {method:'POST'})
-    .then(r => r.json())
-    .then(res => {
-      if (res.status === 'success') {
-        toast(pendingDeleteAll ? 'All records cleared!' : 'Victim deleted!', 'success');
-        loadData();
-      } else {
-        toast('Error: ' + (res.message || 'Unknown'), 'error');
-      }
-    })
-    .catch(() => toast('Network error', 'error'));
-}
-
-// Close modal on overlay click
-document.getElementById('confirm-modal').addEventListener('click', function(e) {
-  if (e.target === this) closeModal();
-});
-
-// Socket.io live updates
-socket.on('new_victim', (data) => {
-  try { document.getElementById('notif-sound').play(); } catch(e){}
-  toast(`🔥 New victim! Platform: ${data.platform || 'Unknown'}`, 'success');
-  loadData();
-  if (Notification.permission === 'granted') {
-    new Notification('PhishStrike: New Victim!', { body: `Platform: ${data.platform}` });
+  if(confirm("Confirm data purge?")) {
+    fetch(`/api/delete/${id}`, {method:'POST'}).then(() => {
+      toast('Record purged from database.', 'success');
+      loadData();
+    });
   }
+}
+
+socket.on('new_victim', (data) => {
+  toast(`CRITICAL: New data captured via ${data.platform.toUpperCase()}`, 'success');
+  loadData();
 });
 
-// Request notification permission
-if (Notification.permission !== 'denied') Notification.requestPermission();
-
-// Initial load + auto-refresh every 15s
 loadData();
-setInterval(loadData, 15000);
+setInterval(loadData, 30000);
 </script>
 </body>
 </html>

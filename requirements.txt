@@ -5,3 +5,4 @@ google-generativeai
 pandas
 openpyxl
 requests
+fpdf2
