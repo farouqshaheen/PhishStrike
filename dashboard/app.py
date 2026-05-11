@@ -164,6 +164,12 @@ def export_pdf():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
+@app.route("/api/refresh")
+def refresh():
+    socketio.emit("new_victim", {"status": "refresh"})
+    return jsonify({"status": "ok"})
+
+
 def notify_new_victim(data):
     socketio.emit("new_victim", data)
 

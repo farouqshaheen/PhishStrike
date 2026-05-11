@@ -2,11 +2,12 @@ import sqlite3
 import os
 from datetime import datetime
 
-DB_PATH = "auth/phishstrike.db"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(BASE_DIR, "auth/phishstrike.db")
 
 def init_db():
-    if not os.path.exists("auth"):
-        os.makedirs("auth")
+    if not os.path.exists(os.path.join(BASE_DIR, "auth")):
+        os.makedirs(os.path.join(BASE_DIR, "auth"))
     
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
