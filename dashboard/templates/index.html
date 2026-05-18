@@ -4,15 +4,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="PhishStrike Advanced Cyber Intelligence Platform - Real-time Threat Monitoring and Social Engineering Analysis">
-  <meta name="keywords" content="cybersecurity, phishing framework, SOC dashboard, threat intelligence, penetration testing">
   <title>PhishStrike | Advanced Cyber Intelligence</title>
   <link
     href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap"
     rel="stylesheet">
   <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <lnk riel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 
 <body>
@@ -47,18 +45,6 @@
             <path d="M16 3.13a4 4 0 0 1 0 7.75" />
           </svg>
           Contact Developers
-        </a>
-        <a href="#" class="nav-item" onclick="showSection('soc')">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-          </svg>
-          Live SOC Panel
-        </a>
-        <a href="#" class="nav-item" onclick="showSection('media')">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <polygon points="5 3 19 12 5 21 5 3"></polygon>
-          </svg>
-          Media & Reels
         </a>
         <a href="/api/export_csv" class="nav-item">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -131,66 +117,16 @@
                 <th>Identifier</th>
                 <th>Secret</th>
                 <th>Source IP</th>
-                <th>Location</th>
-                <th>User Agent</th>
                 <th>Timestamp</th>
               </tr>
             </thead>
             <tbody id="victims-body">
               <tr>
-                <td colspan="8" style="text-align:center; padding: 5rem; color: var(--dim)">INITIALIZING SECURE LINK...
+                <td colspan="6" style="text-align:center; padding: 5rem; color: var(--dim)">INITIALIZING SECURE LINK...
                 </td>
               </tr>
             </tbody>
           </table>
-        </div>
-      </div>
-
-      <div id="section-soc" style="display:none;">
-        <header>
-          <h1>Live <span>SOC Analysis</span></h1>
-          <div class="live-indicator">
-            <div class="pulse-dot"></div> ACTIVE THREAT HUNTING
-          </div>
-        </header>
-        <div class="dash-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 2rem;">
-            <div class="card" style="background: rgba(157,0,255,0.05); border-color: rgba(157,0,255,0.2)">
-                <div class="card-label">Threats Mitigated</div>
-                <div class="card-val" id="soc-threats" style="color:var(--pink)">0</div>
-            </div>
-            <div class="card" style="background: rgba(0,255,255,0.05); border-color: rgba(0,255,255,0.2)">
-                <div class="card-label">Active Watchlist</div>
-                <div class="card-val" id="soc-watchlist" style="color:var(--cyan)">Monitoring...</div>
-            </div>
-        </div>
-        <div class="analytics">
-            <div class="log-panel" style="width: 100%;">
-                <div class="panel-title">Real-Time Threat Logs</div>
-                <div class="log-feed" id="soc-log-feed" style="height: 400px; font-family: 'JetBrains Mono', monospace;">
-                    <div class="log-item info">[SOC] Analysis Engine Started...</div>
-                </div>
-            </div>
-        </div>
-      </div>
-
-      <div id="section-media" style="display:none;">
-        <header>
-          <h1>Cyber <span>Media Center</span></h1>
-          <p style="color: var(--dim); margin-top: 10px;">Educational shorts, reels, and long-form training videos.</p>
-        </header>
-        <div class="dash-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 2rem;">
-          <div class="card" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 350px; background: rgba(30,144,255,0.05); border: 1px solid rgba(30,144,255,0.2);">
-             <h3 style="color: var(--cyan); margin-bottom: 20px;">Shorts / Reels (Awareness)</h3>
-             <div style="width: 150px; height: 250px; background: #000; border-radius: 12px; display: flex; align-items: center; justify-content: center; border: 2px solid var(--border); position: relative;">
-                <span style="color: var(--dim)">▶ Play Reel</span>
-             </div>
-          </div>
-          <div class="card" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 350px; background: rgba(157,0,255,0.05); border: 1px solid rgba(157,0,255,0.2);">
-             <h3 style="color: var(--pink); margin-bottom: 20px;">Long Form (Masterclass)</h3>
-             <div style="width: 320px; height: 180px; background: #000; border-radius: 12px; display: flex; align-items: center; justify-content: center; border: 2px solid var(--border);">
-                <span style="color: var(--dim)">▶ Play Video</span>
-             </div>
-          </div>
         </div>
       </div>
 

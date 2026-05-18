@@ -145,19 +145,3 @@ Rules:
 """
     api_key = get_api_key()
     return _call_api_http(api_key, prompt)
-
-def analyze_social_profile(target_info):
-    prompt = f"""
-You are an advanced Deep Social AI Profiler used for security analysis.
-Analyze the following target information (could be a username, bio, or brief behavior description):
-"{target_info}"
-
-Please provide a psychological and social engineering profile, including:
-1. Potential vulnerabilities (e.g. oversharing, gullibility).
-2. Most effective social engineering vectors (e.g. urgency, authority, greed).
-3. Recommended phishing pretext scenarios (e.g. fake job offer, security alert).
-
-Format the output clearly with bullet points.
-"""
-    api_key = get_api_key()
-    return _call_api_http(api_key, prompt)
