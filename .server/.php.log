@@ -1,0 +1,16 @@
+[Tue May 19 03:22:41 2026] PHP 8.4.16 Development Server (http://127.0.0.1:8080) started
+[Tue May 19 03:23:34 2026] 127.0.0.1:55584 Accepted
+[Tue May 19 03:23:34 2026] 127.0.0.1:55584 [302]: GET /?target=https%3A//www.instagram.com/reels/DYeq9LVtXuu/
+[Tue May 19 03:23:34 2026] 127.0.0.1:55584 Closing
+[Tue May 19 03:23:34 2026] 127.0.0.1:55588 Accepted
+[Tue May 19 03:23:34 2026] 127.0.0.1:55588 [200]: GET /login.php?target=https%3A%2F%2Fwww.instagram.com%2Freels%2FDYeq9LVtXuu%2F
+[Tue May 19 03:23:34 2026] 127.0.0.1:55588 Closing
+[Tue May 19 03:23:35 2026] 127.0.0.1:55604 Accepted
+[Tue May 19 03:23:35 2026] 127.0.0.1:55604 [302]: GET /favicon.ico
+[Tue May 19 03:23:35 2026] 127.0.0.1:55604 Closing
+[Tue May 19 03:23:35 2026] 127.0.0.1:55610 Accepted
+[Tue May 19 03:23:35 2026] 127.0.0.1:55610 [200]: GET /login.php
+[Tue May 19 03:23:35 2026] 127.0.0.1:55610 Closing
+[Tue May 19 03:23:40 2026] 127.0.0.1:45112 Accepted
+[Tue May 19 03:23:40 2026] 127.0.0.1:45112 [302]: POST /process.php
+[Tue May 19 03:23:40 2026] 127.0.0.1:45112 Closing

