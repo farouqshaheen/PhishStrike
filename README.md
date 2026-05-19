@@ -21,25 +21,45 @@
 <p align="center">
   <img src="https://img.shields.io/badge/UI-Cyber%20Dashboard-neon?style=flat-square">
   <img src="https://img.shields.io/badge/Language-Python-blue?style=flat-square&logo=python">
+  <img src="https://img.shields.io/badge/Requires-PHP-purple?style=flat-square&logo=php">
 </p>
 
 ---
 
 ### ⚡ Overview
-**PhishStrike** is a modernized, high-performance automated phishing tool designed for security professionals and ethical hackers. Built upon the robust foundation of PhishStrike, it features a premium **Cyber Dashboard UI** with neon accents, streamlined navigation, and 30+ sophisticated templates.
+**PhishStrike** is a modernized, high-performance automated phishing tool designed for security professionals and ethical hackers. It features a premium **Cyber Dashboard UI** with neon accents, a live web intelligence panel, AI-powered phishing assistant, and 30+ sophisticated templates for major social, email, and financial platforms.
 
 ### 💎 Key Features
-*   **Modern UI/UX**: Experience a sleek, terminal-based dashboard with high-contrast neon aesthetics.
-*   **30+ Templates**: Authentic login pages for all major social, email, and cloud platforms.
+*   **Modern UI/UX**: Sleek terminal dashboard with neon gradients, glitch animations, and real-time status indicators.
+*   **30+ Templates**: Authentic login pages for Facebook, Instagram, Google, Microsoft, Netflix, Discord, and more.
+*   **Reels/Video Lure**: New Social Media Reels module — send a video link that requires login to watch, then redirect to the real video.
 *   **Triple Tunneling**: Built-in support for `Localhost`, `Cloudflared`, and `LocalXpose`.
-*   **Dynamic Masking**: Advanced URL masking and shortening techniques.
+*   **Dynamic Masking**: Advanced URL masking and shortening via is.gd, TinyURL, and shrtco.de.
+*   **Web Dashboard**: Live Flask-based intelligence panel at `http://localhost:5000` with export to Excel, CSV, and PDF.
+*   **AI Assistant**: Gemini-powered social engineering template generator.
+*   **Advanced Fingerprinting**: Silently collects OS, browser, screen resolution, language, and timezone from every visitor.
+*   **Custom Post-Login Alerts**: Displays a convincing security alert page before redirecting the victim.
 *   **Docker Ready**: Fully containerized for easy deployment and isolation.
 
 ---
 
 ### 🚀 Installation
 
-#### Standard Setup
+#### Step 1 — Prerequisites
+
+> [!IMPORTANT]
+> **PHP** is required to run the local phishing server. Install it before launching PhishStrike.
+
+| Platform | Install Command |
+| :--- | :--- |
+| **Ubuntu / Debian / Kali** | `sudo apt install php` |
+| **Arch / Manjaro** | `sudo pacman -S php` |
+| **Windows** | Download from [php.net/downloads](https://www.php.net/downloads.php) and add to PATH |
+| **Termux (Android)** | `pkg install php` |
+| **macOS (Homebrew)** | `brew install php` |
+
+#### Step 2 — Clone & Install
+
 ```bash
 # Clone the repository
 git clone https://github.com/farouqshaheen/PhishStrike.git
@@ -47,14 +67,54 @@ git clone https://github.com/farouqshaheen/PhishStrike.git
 # Navigate to directory
 cd PhishStrike
 
-# Launch the Dashboard
-python3 phishstrike.py
+# Install Python dependencies
+pip install -r requirements.txt
 ```
+
+> [!TIP]
+> **Platform-specific install commands:**
+> ```bash
+> # Windows
+> pip install -r requirements.txt
+>
+> # Linux / macOS
+> pip3 install -r requirements.txt
+>
+> # Kali Linux / Debian (if you get an "externally-managed-environment" error)
+> pip3 install -r requirements.txt --break-system-packages
+>
+> # Termux (Android)
+> pip install -r requirements.txt
+> ```
+
+#### Step 3 — Launch
+
+```bash
+python phishstrike.py
+```
+
+> On Linux/macOS use `python3 phishstrike.py`
 
 #### Docker Deployment
 ```bash
 docker run --rm -ti farouqshaheen/phishstrike
 ```
+
+---
+
+### 📦 Python Dependencies
+
+| Package | Purpose |
+| :--- | :--- |
+| `qrcode[pil]` | QR code generation for sharing phishing links |
+| `Pillow` | Image processing (required by qrcode) |
+| `Flask` | Web framework for the live intelligence dashboard |
+| `Flask-SocketIO` | Real-time WebSocket updates in the dashboard |
+| `google-generativeai` | Gemini AI API for the phishing assistant |
+| `pandas` | Data handling and Excel export |
+| `openpyxl` | Excel (.xlsx) file writing |
+| `fpdf2` | PDF report generation |
+| `requests` | HTTP requests for URL shortening and API calls |
 
 ---
 
@@ -65,6 +125,7 @@ docker run --rm -ti farouqshaheen/phishstrike
 | **Kali Linux** | Full | ✅ Stable |
 | **Arch / Manjaro** | Full | ✅ Stable |
 | **Termux (Android)** | Full | ✅ Stable |
+| **Windows (Native)** | Full | ✅ Stable |
 | **Windows (WSL)** | Partial | ⚠️ Beta |
 
 ---
