@@ -1,16 +1,26 @@
 import os
 import json
 import urllib.request
+import warnings
 
 CONFIG_PATH = "auth/ai_config.json"
 
-# Try new SDK first, fall back to direct HTTP
+# Try new google.genai SDK first, fall back to legacy SDK, then direct HTTP
 try:
-    import google.generativeai as genai
+    import google.genai as genai_new  # noqa: F401
 
-    USE_SDK = True
-except ImportError:
+    USE_NEW_SDK = True
     USE_SDK = False
+except ImportError:
+    USE_NEW_SDK = False
+    try:
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=FutureWarning)
+            import google.generativeai as genai  # noqa: F401
+
+        USE_SDK = True
+    except ImportError:
+        USE_SDK = False
 
 
 def setup_ai():

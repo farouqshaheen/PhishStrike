@@ -68,6 +68,15 @@ def delete_victim(victim_id):
     conn.close()
 
 
+def clear_all_victims():
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM victims")
+    conn.commit()
+    conn.close()
+
+
+
 def get_stats():
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()

@@ -1,0 +1,28 @@
+# Python Byte-code Cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Local Phishing Server logs & temp files
+.server/
+auth/*.db
+auth/*.dat
+auth/*.txt
+auth/*.xlsx
+auth/*.csv
+auth/*.pdf
+
+# Generated QR Codes
+qrcodes/
+
+# Node or packaging environments if any
+node_modules/
+.venv/
+env/
+venv/
+ENV/
+
+# OS specific files
+.DS_Store
+Thumbs.db

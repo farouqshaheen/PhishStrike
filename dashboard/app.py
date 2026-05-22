@@ -57,12 +57,7 @@ def delete_victim(victim_id):
 @app.route("/api/delete_all", methods=["POST"])
 def delete_all_victims():
     try:
-        import sqlite3
-
-        conn = sqlite3.connect(database.DB_PATH)
-        conn.execute("DELETE FROM victims")
-        conn.commit()
-        conn.close()
+        database.clear_all_victims()
         return jsonify({"status": "success"})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500

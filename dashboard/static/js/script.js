@@ -29,11 +29,14 @@ function drawParticles() {
 }
 initParticles(); drawParticles(); window.addEventListener('resize', initParticles);
 
-function showSection(id) {
+function showSection(id, e) {
   document.getElementById('section-dashboard').style.display = id === 'dashboard' ? 'block' : 'none';
   document.getElementById('section-contact').style.display = id === 'contact' ? 'block' : 'none';
   document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-  event.currentTarget.classList.add('active');
+  const currentEvent = e || window.event;
+  if (currentEvent && currentEvent.currentTarget) {
+    currentEvent.currentTarget.classList.add('active');
+  }
 }
 
 const socket = io();
