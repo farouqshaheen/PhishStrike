@@ -202,6 +202,35 @@ footer {
 .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #000; font-weight: 800; }
 .btn-primary:hover { transform: translateY(-3px) scale(1.05); box-shadow: 0 10px 20px var(--accent-glow); }
 
-@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
+/* Export Buttons */
+.export-buttons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+.export-btn {
+  flex: 1;
+  min-width: 70px;
+  padding: 0.9rem 1.2rem;
+  border-radius: 14px;
+  background: rgba(0, 255, 255, 0.08);
+  color: var(--accent);
+  border: 1px solid rgba(0, 255, 255, 0.2);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.85rem;
+  transition: 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+}
+.export-btn:hover {
+  background: rgba(0, 255, 255, 0.15);
+  border-color: rgba(0, 255, 255, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 255, 255, 0.2);
+}

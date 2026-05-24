@@ -4,6 +4,15 @@ __pycache__/
 *.pyo
 *.pyd
 
+# PhishStrike - Git Ignore Rules
+
+# ─── Environment & Secrets ───────────────────────────────────────────────────
+.env
+
+# ─── Application Logs ────────────────────────────────────────────────────────
+logs/
+*.log
+
 # Local Phishing Server logs & temp files
 .server/
 auth/*.db
@@ -15,6 +24,10 @@ auth/*.pdf
 
 # Generated QR Codes
 qrcodes/
+
+# AI outputs & API keys
+ai_output/
+auth/ai_config.json
 
 # Node or packaging environments if any
 node_modules/

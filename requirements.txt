@@ -20,6 +20,11 @@ Pillow             # Image processing library (required by qrcode[pil])
 # ─── Web Dashboard (Flask-based live panel) ─────────────────────────────
 Flask              # Lightweight web framework for the dashboard
 Flask-SocketIO     # Real-time WebSocket support for live credential feed
+Flask-Login        # Session-based authentication and login protection
+bcrypt             # Secure password hashing (Blowfish algorithm)
+cryptography       # Fernet encryption for capture data at rest (optional)
+python-dotenv      # Load environment variables from .env files
+waitress           # Production-grade WSGI server (Windows + Linux)
 
 # ─── AI Phishing Assistant ──────────────────────────────────────────────
 google-generativeai # Gemini AI API integration for generating phishing templates
@@ -31,3 +36,6 @@ fpdf2              # PDF report generation
 
 # ─── Networking & HTTP ──────────────────────────────────────────────────
 requests           # HTTP requests for URL checking and API calls
+
+# ─── Development / CI (install: pip install -r requirements-dev.txt) ─────
+# pytest           # see requirements-dev.txt

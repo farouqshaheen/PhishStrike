@@ -75,11 +75,11 @@ def check_status():
     try:
         urllib.request.urlopen("https://api.github.com", timeout=3)
         sys.stdout.write(
-            f"\r    {ui.gradient_text('[+] System Status: ', ui.RGB_PURPLE, ui.RGB_BLUE)}{ui.BOLD}\033[32mONLINE{ui.RESET}\n"
+            f"\r    {ui.gradient_text('[+] System Status: ', ui.RGB_PURPLE, ui.RGB_BLUE)}{ui.BOLD}\033[32mONLINE{' ' * 20}{ui.RESET}\n"
         )
     except Exception:
         sys.stdout.write(
-            f"\r    {ui.gradient_text('[+] System Status: ', ui.RGB_PURPLE, ui.RGB_BLUE)}{ui.BOLD}\033[31mOFFLINE{ui.RESET}\n"
+            f"\r    {ui.gradient_text('[+] System Status: ', ui.RGB_PURPLE, ui.RGB_BLUE)}{ui.BOLD}\033[31mOFFLINE{' ' * 20}{ui.RESET}\n"
         )
 
 

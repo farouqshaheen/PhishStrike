@@ -9,8 +9,13 @@ import database
 from lib import ai_assistant
 from lib import site_injector
 from lib.site_injector import inject_features
+from phishstrike import state
+from phishstrike.runner import main
+from phishstrike.capture.monitor import capture_data
+from phishstrike.cli.menu import main_menu
 
 print("  PASS: All core imports OK")
+print("  PASS: phishstrike package imports OK")
 
 # Test 2: Dashboard deps
 print("[TEST 2] Checking dashboard dependencies...")
@@ -73,6 +78,7 @@ required = [
     "fpdf2",
     "requests",
     "pillow",
+    "cryptography",
 ]
 with open("requirements.txt", "r") as f:
     req_content = f.read().lower()

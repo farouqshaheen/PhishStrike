@@ -56,7 +56,20 @@ shutil.copy2("scripts/launch.py", f"build_env/{bin_dir}/{PACKAGE}")
 if platform.system() != "Windows":
     os.chmod(f"build_env/{bin_dir}/{PACKAGE}", 0o755)
 
-for item in [".github", ".sites", "LICENSE", "README.md", "phishstrike.py", "lib", "dashboard", "database.py", "requirements.txt"]:
+for item in [
+    ".github",
+    ".sites",
+    "LICENSE",
+    "README.md",
+    "phishstrike.py",
+    "phishstrike",
+    "lib",
+    "dashboard",
+    "database.py",
+    "config.py",
+    "requirements.txt",
+    "scripts",
+]:
     if os.path.exists(item):
         if os.path.isdir(item):
             shutil.copytree(item, f"build_env/{opt_dir}/{item}")
