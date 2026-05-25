@@ -5,7 +5,6 @@ import sys
 import time
 
 from phishstrike import state
-from phishstrike.lib import site_injector
 from phishstrike.lib.terminal_ui import *
 
 
@@ -77,17 +76,15 @@ def setup_site() -> None:
     )
 
     try:
-        site_injector.inject_features(www_dir)
         slow_type(
-            "    [+] Advanced Fingerprinting & Alerts Injected...",
+            "    [+] Site configured (advanced features removed)...",
             speed=0.01,
             start_rgb=RGB_WHITE,
             end_rgb=RGB_PURPLE,
         )
     except Exception as e:
         print(
-            f"    {DARK}[{PINK}!{DARK}]{PINK} Warning: Could not inject advanced "
-            f"features: {e}"
+            f"    {DARK}[{PINK}!{DARK}]{PINK} Warning: {e}"
         )
 
     php_bin = shutil.which("php") or shutil.which("php.exe")

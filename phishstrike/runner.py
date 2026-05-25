@@ -31,7 +31,6 @@ def _ensure_dependencies() -> None:
         import qrcode  # noqa: F401
         from phishstrike.core import database  # noqa: F401
         from phishstrike.lib import ai_assistant  # noqa: F401
-        from phishstrike.lib import site_injector  # noqa: F401
         from phishstrike.lib.dashboard_client import notify_dashboard_refresh  # noqa: F401
     except ImportError as e:
         _missing = str(e).split("'")

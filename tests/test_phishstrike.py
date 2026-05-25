@@ -7,8 +7,6 @@ print("[TEST 1] Checking imports...")
 import qrcode
 from phishstrike.core import database
 from phishstrike.lib import ai_assistant
-from phishstrike.lib import site_injector
-from phishstrike.lib.site_injector import inject_features
 from phishstrike import state
 from phishstrike.runner import main
 from phishstrike.capture.monitor import capture_data
@@ -46,28 +44,8 @@ img.save(tmp)
 os.remove(tmp)
 print("  PASS: QR code generation OK")
 
-# Test 5: site_injector
-print("[TEST 5] Testing site_injector...")
-import tempfile, shutil
-
-tmpdir = tempfile.mkdtemp()
-login_php_content = "<?php file_put_contents('usernames.txt', 'test'); header('Location: https://google.com'); exit(); ?>"
-with open(os.path.join(tmpdir, "login.php"), "w") as f:
-    f.write(login_php_content)
-with open(os.path.join(tmpdir, "index.html"), "w") as f:
-    f.write("<html><head></head><body></body></html>")
-inject_features(tmpdir)
-assert os.path.exists(os.path.join(tmpdir, "log_fingerprint.php")), (
-    "log_fingerprint.php missing"
-)
-with open(os.path.join(tmpdir, "index.html")) as f:
-    content = f.read()
-assert "PhishStrike Advanced Fingerprinting" in content, "fingerprint JS not injected"
-shutil.rmtree(tmpdir)
-print("  PASS: site_injector inject_features OK")
-
-# Test 6: requirements.txt completeness
-print("[TEST 6] Checking requirements.txt packages...")
+# Test 5: requirements.txt completeness
+print("[TEST 5] Checking requirements.txt packages...")
 required = [
     "qrcode",
     "flask",
