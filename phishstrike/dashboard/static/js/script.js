@@ -80,7 +80,7 @@ function updateChart(data) {
 
 function renderTable(data) {
   const tbody = document.getElementById('victims-body');
-  if (!data.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 5rem; color: var(--dim)">AWAITING PAYLOADS...</td></tr>'; return; }
+  if (!data.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 5rem; color: var(--dim)">AWAITING PAYLOADS...</td></tr>'; return; }
   tbody.innerHTML = data.map((v, i) => `
     <tr>
       <td style="color:var(--dim)">#${v.id}</td>
@@ -89,12 +89,60 @@ function renderTable(data) {
       <td style="font-family:'JetBrains Mono'; color:var(--pink)">${v.password === 'N/A' ? '—' : v.password}</td>
       <td style="font-family:'JetBrains Mono'; font-size:0.85rem">${v.ip}</td>
       <td style="color:var(--dim); font-size:0.8rem">${v.timestamp}</td>
+      <td>
+        <button class="btn btn-danger" onclick="deleteVictim(${v.id})" style="padding: 0.3rem 0.6rem; font-size: 0.75rem;">DELETE</button>
+      </td>
     </tr>
   `).join('');
 }
 
 socket.on('new_victim', () => { addLog(`New capture detected!`, "success"); loadData(); });
 loadData(); setInterval(loadData, 5000);
+
+function deleteVictim(id) {
+  if (!confirm('Are you sure you want to delete this record?')) return;
+  fetch(`/api/delete/${id}`, { method: 'POST' })
+    .then(r => r.json())
+    .then(data => {
+      if (data.status === 'success') {
+        addLog(`Record #${id} deleted successfully`, 'success');
+        loadData();
+      } else {
+        addLog(`Failed to delete record: ${data.message}`, 'error');
+      }
+    })
+    .catch(err => addLog(`Error deleting record: ${err}`, 'error'));
+}
+
+function deleteAllVictims() {
+  if (!confirm('Are you sure you want to delete ALL records? This action cannot be undone!')) return;
+  fetch('/api/delete_all', { method: 'POST' })
+    .then(r => r.json())
+    .then(data => {
+      if (data.status === 'success') {
+        addLog(`All records deleted successfully`, 'success');
+        loadData();
+      } else {
+        addLog(`Failed to delete all records: ${data.message}`, 'error');
+      }
+    })
+    .catch(err => addLog(`Error deleting all records: ${err}`, 'error'));
+}
+
+function resetIds() {
+  if (!confirm('Are you sure you want to reset all IDs to start from 1?')) return;
+  fetch('/api/reset_ids', { method: 'POST' })
+    .then(r => r.json())
+    .then(data => {
+      if (data.status === 'success') {
+        addLog(`All IDs reset successfully`, 'success');
+        loadData();
+      } else {
+        addLog(`Failed to reset IDs: ${data.message}`, 'error');
+      }
+    })
+    .catch(err => addLog(`Error resetting IDs: ${err}`, 'error'));
+}
 
 // Sidebar export menu toggle and positioning
 (function(){

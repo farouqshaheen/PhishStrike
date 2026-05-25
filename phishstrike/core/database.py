@@ -105,6 +105,52 @@ def clear_all_victims():
     conn.close()
 
 
+def reset_ids():
+    """Reset all IDs to start from 1 in sequential order"""
+    conn = _connect()
+    cursor = conn.cursor()
+    
+    # Get all victims ordered by timestamp
+    cursor.execute("SELECT * FROM victims ORDER BY timestamp ASC")
+    rows = cursor.fetchall()
+    
+    # Create a mapping of old IDs to new IDs
+    old_to_new = {}
+    for idx, row in enumerate(rows, 1):
+        old_id = row[0]
+        old_to_new[old_id] = idx
+    
+    # Create a new table with the same structure
+    cursor.execute("""
+        CREATE TABLE victims_new (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            platform TEXT,
+            username TEXT,
+            password TEXT,
+            ip TEXT,
+            timestamp DATETIME,
+            user_agent TEXT,
+            location TEXT
+        )
+    """)
+    
+    # Copy data with new IDs
+    for row in rows:
+        old_id = row[0]
+        new_id = old_to_new[old_id]
+        cursor.execute("""
+            INSERT INTO victims_new (id, platform, username, password, ip, timestamp, user_agent, location)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, (new_id, row[1], row[2], row[3], row[4], row[5], row[6], row[7]))
+    
+    # Drop old table and rename new table
+    cursor.execute("DROP TABLE victims")
+    cursor.execute("ALTER TABLE victims_new RENAME TO victims")
+    
+    conn.commit()
+    conn.close()
+
+
 def get_stats():
     conn = _connect()
     total = conn.execute("SELECT COUNT(*) FROM victims").fetchone()[0]

