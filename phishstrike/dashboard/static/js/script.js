@@ -95,3 +95,47 @@ function renderTable(data) {
 
 socket.on('new_victim', () => { addLog(`New capture detected!`, "success"); loadData(); });
 loadData(); setInterval(loadData, 5000);
+
+// Sidebar export menu toggle and positioning
+(function(){
+  const exportNav = document.getElementById('nav-export');
+  const exportMenu = document.getElementById('sidebarExportMenu');
+  function positionExportMenu(){
+    if(!exportNav || !exportMenu) return;
+    const rect = exportNav.getBoundingClientRect();
+    const top = rect.top + window.scrollY;
+    const left = rect.right + 12; // place just outside sidebar
+    exportMenu.style.top = `${top}px`;
+    exportMenu.style.left = `${left}px`;
+  }
+
+  window.toggleExportMenu = function(e){
+    if(e){ e.preventDefault(); e.stopPropagation(); }
+    if(!exportMenu || !exportNav) return;
+    const open = exportMenu.classList.toggle('open');
+    exportMenu.setAttribute('aria-hidden', open ? 'false' : 'true');
+    exportNav.classList.toggle('active', open);
+    if(open) positionExportMenu();
+  };
+
+  document.addEventListener('click', (ev)=>{
+    if(!exportMenu || !exportNav) return;
+    if(!exportMenu.contains(ev.target) && !exportNav.contains(ev.target)){
+      exportMenu.classList.remove('open');
+      exportMenu.setAttribute('aria-hidden','true');
+      exportNav.classList.remove('active');
+    }
+  });
+
+  window.addEventListener('resize', ()=>{ if(exportMenu && exportMenu.classList.contains('open')) positionExportMenu(); });
+
+  if(exportMenu){
+    exportMenu.querySelectorAll('.sidebar-export-item').forEach(item=>{
+      item.addEventListener('click', ()=>{
+        const ep = item.dataset.endpoint;
+        // navigate to the server endpoint to trigger download
+        window.location.href = ep;
+      });
+    });
+  }
+})();

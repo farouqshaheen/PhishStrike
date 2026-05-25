@@ -30,7 +30,7 @@ class Config:
     DEBUG = os.environ.get("DEBUG", "False").lower() == "true"
 
     # ─── Database ────────────────────────────────────────────────────────
-    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     DB_PATH = os.environ.get(
         "DB_PATH", os.path.join(BASE_DIR, "auth", "phishstrike.db")
     )

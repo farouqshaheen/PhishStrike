@@ -1,9 +1,9 @@
 import os
 import time
 
-import database
-from lib.dashboard_client import notify_dashboard_refresh
-from lib.terminal_ui import *
+from phishstrike.core import database
+from phishstrike.lib.dashboard_client import notify_dashboard_refresh
+from phishstrike.lib.terminal_ui import *
 from phishstrike import state
 
 

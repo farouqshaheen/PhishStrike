@@ -3,7 +3,7 @@ import os
 import qrcode
 
 from phishstrike import state
-from lib.terminal_ui import *
+from phishstrike.lib.terminal_ui import *
 
 
 def generate_qr(url: str) -> None:

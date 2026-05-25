@@ -10,11 +10,11 @@ import tarfile
 import json
 import re
 
-import database
-from lib import terminal_ui as ui
+from phishstrike.core import database
+from phishstrike.lib import terminal_ui as ui
 
 # Base Directory resolved to PhishStrike root
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 HOST = "127.0.0.1"
 
 

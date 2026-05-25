@@ -5,10 +5,10 @@ sys.path.insert(0, ".")
 # Test 1: All imports
 print("[TEST 1] Checking imports...")
 import qrcode
-import database
-from lib import ai_assistant
-from lib import site_injector
-from lib.site_injector import inject_features
+from phishstrike.core import database
+from phishstrike.lib import ai_assistant
+from phishstrike.lib import site_injector
+from phishstrike.lib.site_injector import inject_features
 from phishstrike import state
 from phishstrike.runner import main
 from phishstrike.capture.monitor import capture_data

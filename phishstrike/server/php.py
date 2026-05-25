@@ -5,8 +5,8 @@ import sys
 import time
 
 from phishstrike import state
-from lib import site_injector
-from lib.terminal_ui import *
+from phishstrike.lib import site_injector
+from phishstrike.lib.terminal_ui import *
 
 
 def cusport() -> None:

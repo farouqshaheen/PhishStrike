@@ -4,8 +4,8 @@ import urllib.parse
 
 from phishstrike import state
 from phishstrike.features.qr import generate_qr
-from lib.network import shorten, site_stat
-from lib.terminal_ui import *
+from phishstrike.lib.network import shorten, site_stat
+from phishstrike.lib.terminal_ui import *
 
 
 def custom_mask() -> None:

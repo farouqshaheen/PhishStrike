@@ -3,7 +3,7 @@
 import urllib.error
 import urllib.request
 
-from config import Config
+from phishstrike.core.config import Config
 
 
 def notify_dashboard_refresh(timeout: float = 1.0) -> bool:

@@ -8,7 +8,7 @@ from phishstrike.cli.dashboard import show_dashboard_info
 from phishstrike.cli.sites import site_facebook, site_gmail, site_instagram
 from phishstrike.tunnel.helpers import start_background_monitor
 from phishstrike.tunnel.menu import tunnel_menu
-from lib.terminal_ui import *
+from phishstrike.lib.terminal_ui import *
 
 
 def post_attack_menu() -> None:

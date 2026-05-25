@@ -56,6 +56,10 @@ shutil.copy2("scripts/launch.py", f"build_env/{bin_dir}/{PACKAGE}")
 if platform.system() != "Windows":
     os.chmod(f"build_env/{bin_dir}/{PACKAGE}", 0o755)
 
+# Run from PhishStrike root directory
+if not os.path.exists("scripts/launch.py") and os.path.exists("../scripts/launch.py"):
+    os.chdir("..")
+
 for item in [
     ".github",
     ".sites",
@@ -63,10 +67,6 @@ for item in [
     "README.md",
     "phishstrike.py",
     "phishstrike",
-    "lib",
-    "dashboard",
-    "database.py",
-    "config.py",
     "requirements.txt",
     "scripts",
 ]:

@@ -7,11 +7,11 @@ import webbrowser
 
 import platform
 
-from config import Config
+from phishstrike.core.config import Config
 from phishstrike import state
 from phishstrike.capture.monitor import capture_data
 from phishstrike.tunnel.helpers import start_background_monitor
-from lib.terminal_ui import *
+from phishstrike.lib.terminal_ui import *
 
 
 def _dashboard_url() -> str:
@@ -40,7 +40,7 @@ def start_dashboard() -> None:
         )
         return
 
-    app_path = os.path.join(state.BASE_DIR, "dashboard/app.py")
+    app_path = os.path.join(state.BASE_DIR, "phishstrike/dashboard/app.py")
     subprocess.Popen(
         [sys.executable, app_path],
         stdout=subprocess.DEVNULL,

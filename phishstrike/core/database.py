@@ -2,11 +2,12 @@ import os
 import sqlite3
 from datetime import datetime, timedelta
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# BASE_DIR points to repository root
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 def _db_path() -> str:
-    from config import Config
+    from phishstrike.core.config import Config
 
     return Config.DB_PATH
 
@@ -49,7 +50,7 @@ def init_db():
 
 def purge_old_victims() -> int:
     """Delete victim rows older than RETENTION_DAYS (0 = disabled). Returns rows removed."""
-    from config import Config
+    from phishstrike.core.config import Config
 
     days = Config.RETENTION_DAYS
     if days <= 0:

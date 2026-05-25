@@ -7,7 +7,7 @@ from phishstrike import state
 from phishstrike.features.mask import custom_url
 from phishstrike.server.php import cusport, setup_site
 from phishstrike.tunnel.helpers import finish_attack
-from lib.terminal_ui import *
+from phishstrike.lib.terminal_ui import *
 
 
 def start_cloudflared() -> None:

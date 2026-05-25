@@ -2,7 +2,8 @@
 import os
 import subprocess
 
-BASE_DIR = os.path.dirname(os.path.realpath(__file__))
+# Resolve repository root
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 if not os.path.isdir(os.path.join(BASE_DIR, "auth")):
     print("Creating Auth Directory..")
     os.makedirs(os.path.join(BASE_DIR, "auth"))

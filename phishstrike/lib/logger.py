@@ -47,7 +47,7 @@ def get_logger(name: str = "PhishStrike") -> logging.Logger:
     logger.setLevel(logging.DEBUG)
 
     # ─── Ensure logs directory exists ────────────────────────────────────
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     log_dir = os.path.join(base_dir, "logs")
     os.makedirs(log_dir, exist_ok=True)
     log_file = os.path.join(log_dir, "phishstrike.log")

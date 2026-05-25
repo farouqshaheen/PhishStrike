@@ -3,7 +3,7 @@ import time
 
 from phishstrike import state
 from phishstrike.tunnel.menu import tunnel_menu
-from lib.terminal_ui import *
+from phishstrike.lib.terminal_ui import *
 
 
 def site_facebook() -> None:

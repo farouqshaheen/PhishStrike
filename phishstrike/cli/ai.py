@@ -1,7 +1,7 @@
 import os
 
-from lib import ai_assistant
-from lib.terminal_ui import *
+from phishstrike.lib import ai_assistant
+from phishstrike.lib.terminal_ui import *
 
 
 def ai_assistant_menu() -> None:

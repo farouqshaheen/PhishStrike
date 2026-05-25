@@ -17,14 +17,14 @@ os.environ["SECRET_KEY"] = "pytest-secret-key-fixed-for-ci-tests!!"
 
 import pytest
 
-import database
+from phishstrike.core import database
 
 database.init_db()
 
 
 @pytest.fixture
 def client():
-    from dashboard.app import app
+    from phishstrike.dashboard.app import app
 
     app.config["TESTING"] = True
     with app.test_client() as test_client:

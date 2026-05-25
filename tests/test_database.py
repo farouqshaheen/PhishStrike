@@ -1,4 +1,4 @@
-import database
+from phishstrike.core import database
 
 
 def test_add_and_list_victim():

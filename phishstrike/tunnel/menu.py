@@ -4,7 +4,7 @@ import time
 from phishstrike.tunnel.cloudflared import start_cloudflared
 from phishstrike.tunnel.localxpose import start_loclx
 from phishstrike.tunnel.localhost import start_localhost
-from lib.terminal_ui import *
+from phishstrike.lib.terminal_ui import *
 
 
 def tunnel_menu() -> None:
