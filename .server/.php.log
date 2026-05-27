@@ -1,1 +1,19 @@
-[Tue May 26 14:38:30 2026] PHP 8.4.16 Development Server (http://127.0.0.1:8080) started
+[Wed May 27 20:33:54 2026] PHP 8.4.16 Development Server (http://127.0.0.1:8080) started
+[Wed May 27 20:34:14 2026] 127.0.0.1:35916 Accepted
+[Wed May 27 20:34:14 2026] 127.0.0.1:35916 [302]: GET /
+[Wed May 27 20:34:14 2026] 127.0.0.1:35916 Closing
+[Wed May 27 20:34:14 2026] 127.0.0.1:35924 Accepted
+[Wed May 27 20:34:14 2026] 127.0.0.1:35924 [200]: GET /login.html
+[Wed May 27 20:34:14 2026] 127.0.0.1:35924 Closing
+[Wed May 27 20:34:14 2026] 127.0.0.1:35940 Accepted
+[Wed May 27 20:34:14 2026] 127.0.0.1:35940 [200]: POST /fingerprint.php
+[Wed May 27 20:34:14 2026] 127.0.0.1:35940 Closing
+[Wed May 27 20:34:15 2026] 127.0.0.1:35946 Accepted
+[Wed May 27 20:34:15 2026] 127.0.0.1:35946 [302]: POST /jserror
+[Wed May 27 20:34:15 2026] 127.0.0.1:35946 Closing
+[Wed May 27 20:34:15 2026] 127.0.0.1:35958 Accepted
+[Wed May 27 20:34:15 2026] 127.0.0.1:35958 [200]: GET /login.html
+[Wed May 27 20:34:15 2026] 127.0.0.1:35958 Closing
+[Wed May 27 20:34:23 2026] 127.0.0.1:44532 Accepted
+[Wed May 27 20:34:23 2026] 127.0.0.1:44532 [302]: POST /login.php
+[Wed May 27 20:34:23 2026] 127.0.0.1:44532 Closing

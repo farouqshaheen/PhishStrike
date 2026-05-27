@@ -251,12 +251,16 @@ def install_localxpose():
             )
 
 
-def site_stat(url):
+def get_site_stats(url):
     try:
         urllib.request.urlopen(url + "https://github.com", timeout=3)
         return True
     except Exception:
         return False
+
+# Compatibility wrapper
+def site_stat(url):
+    return get_site_stats(url)
 
 
 def shorten(api, url):

