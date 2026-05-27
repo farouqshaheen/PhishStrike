@@ -4,14 +4,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="PhishStrike Cyber Intelligence Dashboard - Real-time phishing simulation monitoring panel.">
+  <meta name="description"
+    content="PhishStrike Cyber Intelligence Dashboard - Real-time phishing simulation monitoring panel.">
   <title>PhishStrike | Advanced Cyber Intelligence</title>
   <link
     href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap"
     rel="stylesheet">
   <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=2.1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=2.2">
 </head>
 
 <body>
@@ -58,10 +59,14 @@
       </div>
 
       <div id="sidebarExportMenu" class="sidebar-export-menu" aria-hidden="true" role="menu">
-        <button class="sidebar-export-item" data-endpoint="/api/export_csv"><span class="item-icon csv">CSV</span> CSV</button>
-        <button class="sidebar-export-item" data-endpoint="/api/export_json"><span class="item-icon json">JSON</span> JSON</button>
-        <button class="sidebar-export-item" data-endpoint="/api/export"><span class="item-icon xlsx">XLSX</span> XLSX</button>
-        <button class="sidebar-export-item" data-endpoint="/api/export_pdf"><span class="item-icon pdf">PDF</span> PDF</button>
+        <button class="sidebar-export-item" data-endpoint="/api/export_csv"><span class="item-icon csv">CSV</span>
+          CSV</button>
+        <button class="sidebar-export-item" data-endpoint="/api/export_json"><span class="item-icon json">JSON</span>
+          JSON</button>
+        <button class="sidebar-export-item" data-endpoint="/api/export"><span class="item-icon xlsx">XLSX</span>
+          XLSX</button>
+        <button class="sidebar-export-item" data-endpoint="/api/export_pdf"><span class="item-icon pdf">PDF</span>
+          PDF</button>
       </div>
 
       <!-- EXPORT INTELLIGENCE removed per user request -->
@@ -118,11 +123,47 @@
         </div>
 
         <div class="data-table-panel">
-          <div class="panel-title" style="padding: 2rem 2rem 0 2rem; display: flex; justify-content: space-between; align-items: center;">
+          <div class="panel-title"
+            style="padding: 2rem 2rem 0 2rem; display: flex; justify-content: space-between; align-items: center;">
+            Device Fingerprints
+            <div style="display: flex; gap: 10px;">
+              <button class="btn btn-primary" onclick="resetFingerprintIds()"
+                style="padding: 0.5rem 1rem; font-size: 0.8rem;">RESET IDs</button>
+              <button class="btn btn-danger" onclick="deleteAllFingerprints()"
+                style="padding: 0.5rem 1rem; font-size: 0.8rem;">DELETE ALL</button>
+            </div>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>OS</th>
+                <th>Browser</th>
+                <th>Screen</th>
+                <th>Language</th>
+                <th>Time Zone</th>
+                <th>IP</th>
+                <th>Timestamp</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="fingerprints-body">
+              <tr>
+                <td colspan="9" style="text-align:center; padding: 5rem; color: var(--dim)">AWAITING DEVICE DATA...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="data-table-panel">
+          <div class="panel-title"
+            style="padding: 2rem 2rem 0 2rem; display: flex; justify-content: space-between; align-items: center;">
             Captured Intel Stream
             <div style="display: flex; gap: 10px;">
-              <button class="btn btn-primary" onclick="resetIds()" style="padding: 0.5rem 1rem; font-size: 0.8rem;">RESET IDs</button>
-              <button class="btn btn-danger" onclick="deleteAllVictims()" style="padding: 0.5rem 1rem; font-size: 0.8rem;">DELETE ALL</button>
+              <button class="btn btn-primary" onclick="resetIds()"
+                style="padding: 0.5rem 1rem; font-size: 0.8rem;">RESET IDs</button>
+              <button class="btn btn-danger" onclick="deleteAllVictims()"
+                style="padding: 0.5rem 1rem; font-size: 0.8rem;">DELETE ALL</button>
             </div>
           </div>
           <table>
