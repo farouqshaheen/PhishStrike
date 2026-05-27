@@ -1,41 +1,24 @@
 # PhishStrike - Python Dependencies
 # Install with: pip install -r requirements.txt
-#
-# Windows:
-#   pip install -r requirements.txt
-#
-# Linux/macOS (if pip3):
-#   pip3 install -r requirements.txt
-#
-# Kali Linux / Debian systems (if externally-managed error):
-#   pip3 install -r requirements.txt --break-system-packages
-#
-# Termux (Android):
-#   pip install -r requirements.txt
 
 # ─── Core QR Code Generation ────────────────────────────────────────────
-qrcode[pil]        # QR code generator (requires Pillow for image output)
-Pillow             # Image processing library (required by qrcode[pil])
+qrcode[pil]>=7.4
+Pillow>=10.0
 
 # ─── Web Dashboard (Flask-based live panel) ─────────────────────────────
-Flask              # Lightweight web framework for the dashboard
-Flask-SocketIO     # Real-time WebSocket support for live credential feed
-Flask-Login        # Session-based authentication and login protection
-bcrypt             # Secure password hashing (Blowfish algorithm)
-cryptography       # Fernet encryption for capture data at rest (optional)
-python-dotenv      # Load environment variables from .env files
-waitress           # Production-grade WSGI server (Windows + Linux)
+Flask>=2.3,<4
+Flask-SocketIO>=5.3,<6
+cryptography>=41.0
+python-dotenv>=1.0
+waitress>=2.1
 
 # ─── AI Phishing Assistant ──────────────────────────────────────────────
-google-generativeai # Gemini AI API integration for generating phishing templates
+google-generativeai>=0.8
 
 # ─── Data Export (Excel / PDF / CSV) ────────────────────────────────────
-pandas             # Data manipulation and Excel export
-openpyxl           # Excel (.xlsx) file writer (required by pandas for Excel)
-fpdf2              # PDF report generation
+pandas>=2.0
+openpyxl>=3.1
+fpdf2>=2.7
 
-# ─── Networking & HTTP ──────────────────────────────────────────────────
-requests           # HTTP requests for URL checking and API calls
-
-# ─── Development / CI (install: pip install -r requirements-dev.txt) ─────
-# pytest           # see requirements-dev.txt
+# ─── Development / CI ───────────────────────────────────────────────────
+# pytest  (in requirements-dev.txt)

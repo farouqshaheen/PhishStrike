@@ -57,9 +57,7 @@ with open(os.path.join(tmpdir, "login.php"), "w") as f:
 with open(os.path.join(tmpdir, "index.html"), "w") as f:
     f.write("<html><head></head><body></body></html>")
 inject_features(tmpdir)
-assert os.path.exists(os.path.join(tmpdir, "log_fingerprint.php")), (
-    "log_fingerprint.php missing"
-)
+
 with open(os.path.join(tmpdir, "index.html")) as f:
     content = f.read()
 assert "PhishStrike Advanced Fingerprinting" in content, "fingerprint JS not injected"
@@ -76,7 +74,6 @@ required = [
     "pandas",
     "openpyxl",
     "fpdf2",
-    "requests",
     "pillow",
     "cryptography",
 ]

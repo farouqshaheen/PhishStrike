@@ -1,7 +1,12 @@
 """Quick test for auth, config, and dashboard integration modules."""
+import os
 import sys
+import tempfile
 
 sys.path.insert(0, ".")
+os.environ["DB_PATH"] = os.path.join(tempfile.gettempdir(), "phishstrike_test.db")
+os.environ["SECRET_KEY"] = "test-secret-key-for-ci-12345678"
+
 from phishstrike.core import database
 import sqlite3
 
@@ -31,11 +36,7 @@ print(
     "PASS" if Config.DASHBOARD_HOST == "127.0.0.1" else "FAIL",
 )
 print(
-    "[TEST H] weak password rejected:",
-    "PASS" if not Config.is_strong_admin_password("phishstrike2025!") else "FAIL",
-)
-print(
-    "[TEST I] internal_api_key stable:",
+    "[TEST H] internal_api_key stable:",
     "PASS" if Config.internal_api_key() == Config.internal_api_key() else "FAIL",
 )
 
@@ -51,12 +52,7 @@ from flask import Flask
 
 print("[TEST K] Flask import: PASS")
 
-# Test 8: bcrypt import
-import bcrypt
-
-print("[TEST L] bcrypt import: PASS")
-
-# Test 9: waitress import
+# Test 8: waitress import
 try:
     from waitress import serve
     print("[TEST M] waitress import: PASS")

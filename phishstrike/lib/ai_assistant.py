@@ -1,44 +1,56 @@
-import os
+import base64
+import hashlib
 import json
+import os
 import urllib.request
-import warnings
+
+from cryptography.fernet import Fernet
 
 CONFIG_PATH = "auth/ai_config.json"
 
-# Try new google.genai SDK first, fall back to legacy SDK, then direct HTTP
-try:
-    import google.genai as genai_new  # noqa: F401
 
-    USE_NEW_SDK = True
-    USE_SDK = False
-except ImportError:
-    USE_NEW_SDK = False
+def _fernet() -> Fernet:
+    from phishstrike.core.config import Config
+
+    raw = hashlib.sha256(Config.SECRET_KEY.encode()).digest()
+    return Fernet(base64.urlsafe_b64encode(raw))
+
+
+def _encrypt(text: str) -> str:
+    return _fernet().encrypt(text.encode()).decode()
+
+
+def _decrypt(token: str) -> str:
     try:
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", category=FutureWarning)
-            import google.generativeai as genai  # noqa: F401
-
-        USE_SDK = True
-    except ImportError:
-        USE_SDK = False
+        return _fernet().decrypt(token.encode()).decode()
+    except Exception:
+        return token
 
 
 def setup_ai():
+    from phishstrike.lib.logger import get_logger
+
+    log = get_logger("AI")
     if os.path.exists(CONFIG_PATH):
-        with open(CONFIG_PATH, "r") as f:
-            config = json.load(f)
-            api_key = config.get("api_key")
+        try:
+            with open(CONFIG_PATH, "r") as f:
+                config = json.load(f)
+            api_key = config.get("api_key", "")
             if api_key:
-                if USE_SDK:
-                    genai.configure(api_key=api_key)
                 return True
+        except Exception as e:
+            log.error(f"Failed to load AI config: {e}")
     return False
 
 
 def get_api_key():
     if os.path.exists(CONFIG_PATH):
-        with open(CONFIG_PATH, "r") as f:
-            return json.load(f).get("api_key", "")
+        try:
+            with open(CONFIG_PATH, "r") as f:
+                encrypted = json.load(f).get("api_key", "")
+                return _decrypt(encrypted) if encrypted else ""
+        except Exception:
+            pass
     return ""
 
 
@@ -46,21 +58,31 @@ def save_api_key(api_key):
     if not os.path.exists("auth"):
         os.makedirs("auth")
     with open(CONFIG_PATH, "w") as f:
-        json.dump({"api_key": api_key}, f)
-    if USE_SDK:
-        genai.configure(api_key=api_key)
+        json.dump({"api_key": _encrypt(api_key)}, f)
+
+
+def _make_request(url: str, api_key: str, data: bytes | None = None, method: str = "GET", timeout: int = 10):
+    """Make a request to Gemini API with key in header (never in URL)."""
+    headers = {
+        "Content-Type": "application/json",
+        "x-goog-api-key": api_key,
+    }
+    req = urllib.request.Request(
+        url, data=data, headers=headers, method=method
+    )
+    return urllib.request.urlopen(req, timeout=timeout)
 
 
 def _get_available_models(api_key):
     """Return a list of models to try, prioritizing those that are likely available."""
-    import json as _json
+    from phishstrike.lib.logger import get_logger
 
+    log = get_logger("AI")
     models_to_try = []
-    url = f"https://generativelanguage.googleapis.com/v1beta/models?key={api_key}"
-    req = urllib.request.Request(url, headers={"Content-Type": "application/json"})
+    url = "https://generativelanguage.googleapis.com/v1beta/models"
     try:
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            data = _json.loads(resp.read().decode("utf-8"))
+        with _make_request(url, api_key, timeout=10) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
             for m in data.get("models", []):
                 methods = m.get("supportedGenerationMethods", [])
                 name = m.get("name", "")
@@ -68,10 +90,9 @@ def _get_available_models(api_key):
                     name = name.replace("models/", "")
                     if "flash" in name:
                         models_to_try.append(name)
-    except Exception:
-        pass
+    except Exception as e:
+        log.warning(f"Model list fetch failed: {e}")
 
-    # Add robust fallbacks in case ListModels fails (e.g. 403 Forbidden)
     fallbacks = [
         "gemini-1.5-flash-latest",
         "gemini-1.5-flash",
@@ -87,54 +108,40 @@ def _get_available_models(api_key):
 
 
 def _call_api_http(api_key, prompt):
-    """Direct HTTP call to Gemini API."""
-    import json as _json
+    """Direct HTTP call to Gemini API with key in header."""
+    from phishstrike.lib.logger import get_logger
 
+    log = get_logger("AI")
     models = _get_available_models(api_key)
     last_error = ""
 
     for model_name in models:
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key}"
-        payload = _json.dumps({"contents": [{"parts": [{"text": prompt}]}]}).encode(
-            "utf-8"
-        )
-
-        req = urllib.request.Request(
-            url,
-            data=payload,
-            headers={"Content-Type": "application/json"},
-            method="POST",
-        )
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent"
+        payload = json.dumps({"contents": [{"parts": [{"text": prompt}]}]}).encode("utf-8")
 
         try:
-            with urllib.request.urlopen(req, timeout=30) as resp:
-                data = _json.loads(resp.read().decode("utf-8"))
+            with _make_request(url, api_key, data=payload, method="POST", timeout=30) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
                 return data["candidates"][0]["content"]["parts"][0]["text"]
         except urllib.error.HTTPError as e:
             try:
                 body = e.read().decode("utf-8")
-                error_data = _json.loads(body)
+                error_data = json.loads(body)
                 error_msg = error_data.get("error", {}).get("message", body)
-
-                # If 404, the model doesn't exist. Try the next one.
                 if e.code == 404:
                     last_error = f"Model {model_name} not found."
                     continue
-
-                # If 429 limit 0, try next model. If it's a temporary 429, maybe break?
-                # Usually we want to try the next model if limit is 0, but we can't easily parse limit: 0 reliably.
-                # Let's just try the next model on any 429.
                 if e.code == 429:
-                    last_error = f"\n\033[1;31m[!] Quota Exceeded (429)\033[0m on {model_name}.\nFull Error: {error_msg}"
+                    last_error = f"Quota Exceeded on {model_name}: {error_msg}"
                     continue
-
                 return f"API Error ({e.code}) on {model_name}: {error_msg}"
             except Exception:
-                return f"API Error ({e.code}) on {model_name}: {str(e)}"
+                return f"API Error ({e.code}) on {model_name}"
         except Exception as e:
-            return f"Error on {model_name}: {str(e)}"
+            log.error(f"Request failed on {model_name}: {e}")
+            return f"Error on {model_name}: {e}"
 
-    return f"Failed to generate template after trying multiple models.\nLast Error: {last_error}"
+    return f"Failed after multiple models.\nLast Error: {last_error}"
 
 
 def generate_templates(platform, scenario):

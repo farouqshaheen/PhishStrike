@@ -12,18 +12,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-WEAK_ADMIN_PASSWORDS = frozenset(
-    {
-        "",
-        "admin",
-        "password",
-        "12345678",
-        "phishstrike",
-        "phishstrike2025!",
-    }
-)
-
-
 class Config:
     # ─── Flask Core ──────────────────────────────────────────────────────
     SECRET_KEY = os.environ.get("SECRET_KEY") or secrets.token_hex(32)
@@ -46,19 +34,11 @@ class Config:
         "http://127.0.0.1:5000,http://localhost:5000",
     )
 
-    # ─── Admin (first-run; set ADMIN_PASSWORD in .env or use scripts/setup_admin.py)
-    ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME", "admin")
-    ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD")
-
     INTERNAL_API_KEY = os.environ.get("INTERNAL_API_KEY")
 
     # ─── Capture storage ─────────────────────────────────────────────────
     CAPTURE_ENCRYPT = os.environ.get("CAPTURE_ENCRYPT", "false").lower() == "true"
     RETENTION_DAYS = int(os.environ.get("RETENTION_DAYS", "0") or "0")
-
-    # ─── Login protection ──────────────────────────────────────────────────
-    LOGIN_MAX_ATTEMPTS = int(os.environ.get("LOGIN_MAX_ATTEMPTS", "5"))
-    LOGIN_WINDOW_SECONDS = int(os.environ.get("LOGIN_WINDOW_SECONDS", "300"))
 
     @classmethod
     def internal_api_key(cls) -> str:
@@ -70,14 +50,6 @@ class Config:
             b"phishstrike-dashboard-internal",
             hashlib.sha256,
         ).hexdigest()
-
-    @classmethod
-    def is_strong_admin_password(cls, password: str | None) -> bool:
-        if not password or len(password) < 8:
-            return False
-        if password.lower() in WEAK_ADMIN_PASSWORDS:
-            return False
-        return True
 
     @classmethod
     def cors_origin_list(cls) -> list[str]:

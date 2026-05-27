@@ -45,18 +45,42 @@ def setup_env():
 
 def kill_pid():
     if platform.system() == "Windows":
-        os.system("taskkill /F /IM php.exe >nul 2>&1")
-        os.system("taskkill /F /IM cloudflared.exe >nul 2>&1")
-        os.system("taskkill /F /IM loclx.exe >nul 2>&1")
-        # Kill any existing dashboard on port 5000 (specifically the LISTENING process)
-        os.system(
-            "for /f \"tokens=5\" %a in ('netstat -aon ^| findstr :5000 ^| findstr LISTENING') do taskkill /F /PID %a >nul 2>&1"
-        )
+        for exe in ["php.exe", "cloudflared.exe", "loclx.exe"]:
+            subprocess.run(
+                ["taskkill", "/F", "/IM", exe],
+                capture_output=True,
+                shell=True,
+            )
+        # Kill any existing dashboard on port 5000 (parse netstat output in Python)
+        try:
+            result = subprocess.run(
+                ["netstat", "-ano"],
+                capture_output=True,
+                text=True,
+                shell=True,
+            )
+            for line in result.stdout.splitlines():
+                if ":5000" in line and "LISTENING" in line:
+                    parts = line.strip().split()
+                    if parts:
+                        pid = parts[-1]
+                        subprocess.run(
+                            ["taskkill", "/F", "/PID", pid],
+                            capture_output=True,
+                            shell=True,
+                        )
+        except Exception:
+            pass
     else:
         for p in ["php", "cloudflared", "loclx"]:
-            os.system(f"killall {p} > /dev/null 2>&1")
-        # Kill any existing dashboard on port 5000 (Linux/Termux)
-        os.system("fuser -k 5000/tcp > /dev/null 2>&1")
+            subprocess.run(
+                ["killall", p],
+                capture_output=True,
+            )
+        subprocess.run(
+            ["fuser", "-k", "5000/tcp"],
+            capture_output=True,
+        )
 
 
 def check_status():
@@ -151,7 +175,7 @@ def download(url, output):
             os.remove(file_name)
     except Exception as e:
         print(
-            f"\n{ui.DARK}[{ui.WHITE}!{ui.DARK}]{ui.DARK} Error occurred while downloading {output}."
+            f"\n{ui.DARK}[{ui.WHITE}!{ui.DARK}]{ui.DARK} Error downloading {output}: {e}"
         )
         ui.reset_color()
         sys.exit(1)

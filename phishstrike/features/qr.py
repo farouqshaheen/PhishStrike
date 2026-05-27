@@ -7,7 +7,7 @@ from phishstrike.lib.terminal_ui import *
 
 
 def generate_qr(url: str) -> None:
-    state.qr_counter += 1
+    counter = state.inc_qr_counter()
     slow_type(
         "    [+] Initializing Tactical QR Engine...",
         speed=0.01,

